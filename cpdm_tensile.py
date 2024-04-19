@@ -160,7 +160,7 @@ for i in range(len(combinations)):
         sc_model, cp_model, results = model.run_cp_dm(**param_dict)
     except:
         data_dict = {"params": combinations[i]}
-        dict_to_csv(data_dict, f"results_{index_1}_{index_2}_{i}")
+        dict_to_csv(data_dict, f"results/{index_1}_{index_2}_{i}")
         continue
 
     # Compile results and write to CSV file
