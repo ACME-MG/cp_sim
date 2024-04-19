@@ -6,7 +6,7 @@ from neml.cp import crystallography, slipharden, sliprules, inelasticity, kinema
 from neml import elasticity, drivers
 
 # Constants
-NUM_THREADS = 8
+NUM_THREADS = 12
 GRAINS_PATH = "orientations.csv"
 STRAIN_RATE = 1.0e-4
 MAX_STRAIN  = 1.0
@@ -82,9 +82,9 @@ class Model:
         dm_planar   = crystaldamage.PlanarDamageModel(dm_model, dm_func, dm_func, self.lattice)
         dm_k_model  = kinematics.DamagedStandardKinematicModel(e_model, i_model, dm_planar)
         sc_dm_model = singlecrystal.SingleCrystalModel(dm_k_model, self.lattice)
-        cp_dm_model = polycrystal.TaylorModel(sc_dm_model, self.orientations, nthreads=NUM_THREADS, weights=self.weights)
-        results     = drivers.uniaxial_test(cp_dm_model, STRAIN_RATE, emax=MAX_STRAIN, nsteps=200, rtol=1e-6, atol=1e-10, miter=25, verbose=False, full_results=True)
-        return sc_dm_model, cp_dm_model, results
+        pc_dm_model = polycrystal.TaylorModel(sc_dm_model, self.orientations, nthreads=NUM_THREADS, weights=self.weights)
+        results     = drivers.uniaxial_test(pc_dm_model, STRAIN_RATE, emax=MAX_STRAIN, nsteps=200, rtol=1e-6, atol=1e-10, miter=25, verbose=False, full_results=True)
+        return sc_dm_model, pc_dm_model, results
 
 def round_sf(value:float, sf:int) -> float:
     """
@@ -127,6 +127,70 @@ def dict_to_csv(data_dict:dict, csv_path:str) -> None:
         csv_fh.write(row_str + "\n")
     csv_fh.close()
 
+def get_grain_dict(pc_model:dict, history:dict, indexes:list) -> dict:
+    """
+    Creates a dictionary of grain information
+
+    Parameters:
+    * `pc_model`: The polycrystal model
+    * `history`:  The history of the model simulation
+    * `indexes`:  The grain indexes to include in the dictionary
+    
+    Returns the dictionary of euler-bunge angles (rads)
+    """
+    
+    # Iterate through each grain
+    grain_dict = {"phi_1": [], "Phi": [], "phi_2": []}
+    for i in indexes:
+        euler_list = [[], [], []]
+        
+        # Get the trajectory of each grain throughout history
+        for state in history:
+            orientations = pc_model.orientations(state)
+            euler = list(orientations[i].to_euler(angle_type="radians", convention="bunge"))
+            for j in range(len(euler_list)):
+                euler_list[j].append(euler[j])
+
+        # Store the trajectories as polynomials
+        for j in range(len(euler_list)):
+            index_list = list(range(len(euler_list[j])))
+            polynomial = list(np.polyfit(index_list, euler_list[j], 5))
+            polynomial_str = " ".join([str(round_sf(coef, 5)) for coef in polynomial])
+            grain_dict[["phi_1", "Phi", "phi_2"][j]].append(polynomial_str)
+    
+    # Return dictionary
+    return grain_dict
+
+def get_top(value_list:list, num_values:int) -> tuple:
+    """
+    Gets the top values and indexes of a list of values
+
+    Parameters:
+    * `value_list`: The list of values
+    * `num_values`: The number of values to return
+
+    Returns the list of top values and indexes
+    """
+    top_value_list = []
+    top_index_list = []
+    for i in range(len(value_list)):
+        value = value_list[i]
+        if len(top_value_list) == 0:
+            top_value_list.append(value)
+            top_index_list.append(i)
+            continue
+        if value < top_value_list[-1] and len(top_value_list) == num_values:
+            continue
+        for j in range(len(top_value_list)):
+            if value > top_value_list[j]:
+                top_value_list.insert(j, value)
+                top_index_list.insert(j, i)
+                break
+        if len(top_value_list) >= num_values:
+            top_value_list.pop(-1)
+            top_index_list.pop(-1)
+    return top_value_list, top_index_list
+
 # Define the model
 model = Model(GRAINS_PATH, 1.0, [1,1,1], [1,1,0])
 
@@ -142,13 +206,16 @@ all_params_dict = {
     "gamma_0": [round_sf(STRAIN_RATE/3, 4)],
     "n":       [1, 2, 3, 4, 5],
     "cd":      [200, 400, 600, 800, 1000],
-    "beta":    [[5, 10, 15, 20, 25, 30][index_2]],
+    "beta":    [[5, 10, 15, 20][index_2]],
 }
 
 # Get combinations of domains
 param_list = list(all_params_dict.values())
 combinations = list(itertools.product(*param_list))
 combinations = [list(c) for c in combinations]
+
+# Get information about 10 biggest grains
+top_weights, top_indexes = get_top(model.get_weights(), 10)
 
 # Iterate through the parameters
 param_names = list(all_params_dict.keys())
@@ -157,14 +224,23 @@ for i in range(len(combinations)):
 
     # Runs the model for the parameter set
     try:
-        sc_model, cp_model, results = model.run_cp_dm(**param_dict)
+        sc_model, pc_model, results = model.run_cp_dm(**param_dict)
     except:
-        data_dict = {"params": combinations[i]}
-        dict_to_csv(data_dict, f"results/{index_1}_{index_2}_{i}")
+        dict_to_csv(param_dict, f"results/{index_1}_{index_2}_{i}")
         continue
 
+    # Get tensile curve
+    strain_list = [round_sf(s[0], 5) for s in results["strain"]]
+    stress_list = [round_sf(s[0], 5) for s in results["stress"]]
+    data_dict = {
+        "strain": strain_list,
+        "stress": stress_list,
+    }
+
+    # Get grain information
+    history = np.array(results["history"])
+    grain_dict = get_grain_dict(pc_model, history, top_indexes)
+
     # Compile results and write to CSV file
-    strain_list = [s[0] for s in results["strain"]]
-    stress_list = [s[0] for s in results["stress"]]
-    data_dict = {"params": combinations[i], "strain": strain_list, "stress": stress_list}
-    dict_to_csv(data_dict, f"results/{index_1}_{index_2}_{i}.csv")
+    combined_dict = {**param_dict, **data_dict, **grain_dict}
+    dict_to_csv(combined_dict, f"results/{index_1}_{index_2}_{i}.csv")
