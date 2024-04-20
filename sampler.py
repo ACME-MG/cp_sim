@@ -7,7 +7,7 @@ from neml.cp import crystallography, slipharden, sliprules, inelasticity, kinema
 from neml import elasticity, drivers
 
 # Constants
-MAX_TIME    = 120 # seconds
+MAX_TIME    = 600 # seconds
 NUM_THREADS = 12
 GRAINS_PATH = "grain_data.csv"
 STRAIN_RATE = 1.0e-4
