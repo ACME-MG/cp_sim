@@ -290,11 +290,11 @@ for i in range(len(combinations)):
 
     # Runs the model for the parameter set
     if thread.is_alive():
-        dict_to_csv({**param_dict, **{"failure": "timeout"}}, f"{results_path}_timeout.csv")
+        dict_to_csv(param_dict, f"{results_path}_timeout.csv")
         continue
     model_output = model.get_results()
     if model_output == None:
-        dict_to_csv({**param_dict, **{"failure": "bad params"}}, f"{results_path}_failed.csv")
+        dict_to_csv(param_dict, f"{results_path}_failed.csv")
         continue
     sc_model, pc_model, results = model_output
 
