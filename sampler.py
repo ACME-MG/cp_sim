@@ -280,7 +280,7 @@ for i in range(len(combinations)):
     # Initialise
     index_str = str(i+1).zfill(3)
     param_dict = dict(zip(param_names, combinations[i]))
-    results_path = f"results/{index_1}_{index_2}_{index_str}.csv"
+    results_path = f"results/{index_1}_{index_2}_{index_str}"
 
     # Prepare the thread for the function
     model.define_params(**param_dict)
@@ -290,11 +290,11 @@ for i in range(len(combinations)):
 
     # Runs the model for the parameter set
     if thread.is_alive():
-        dict_to_csv({**param_dict, **{"failure": "timeout"}}, results_path)
+        dict_to_csv({**param_dict, **{"failure": "timeout"}}, f"{results_path}_timeout.csv")
         continue
     model_output = model.get_results()
     if model_output == None:
-        dict_to_csv({**param_dict, **{"failure": "bad params"}}, results_path)
+        dict_to_csv({**param_dict, **{"failure": "bad params"}}, f"{results_path}_failed.csv")
         continue
     sc_model, pc_model, results = model_output
 
@@ -313,4 +313,4 @@ for i in range(len(combinations)):
 
     # Compile results and write to CSV file
     combined_dict = {**param_dict, **data_dict, **grain_dict}
-    dict_to_csv(combined_dict, results_path)
+    dict_to_csv(combined_dict, f"{results_path}.csv")
