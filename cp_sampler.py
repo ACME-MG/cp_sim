@@ -223,9 +223,9 @@ index_2 = int(sys.argv[2])
 all_params_dict = {
     "tau_sat": [1, 500, 1000, 1500, 2000],
     "b":       [[0.1, 1, 10, 100][index_1]],
-    "tau_0":   [50, 150, 250, 350, 450],
+    "tau_0":   [[50, 100, 200, 400, 800, 1600][index_2]],
     "gamma_0": [round_sf(STRAIN_RATE/3, 4)],
-    "n":       [[1, 2, 4, 8, 16][index_2]],
+    "n":       [1, 2, 4, 8, 16],
 }
 
 # Get combinations of domains
