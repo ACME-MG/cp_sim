@@ -1,7 +1,7 @@
 
 # Libraries
 import numpy as np, itertools
-import sys, threading
+import threading
 from neml.math import rotations
 from neml.cp import crystallography, slipharden, sliprules, inelasticity, kinematics, singlecrystal, polycrystal, crystaldamage
 from neml import elasticity, drivers
@@ -15,6 +15,7 @@ MAX_STRAIN  = 0.5
 YOUNGS      = 211000
 POISSONS    = 0.30
 LATTICE     = 1.0
+TOP_GRAINS  = 10
 
 # Model class
 class Model:
@@ -153,41 +154,39 @@ def get_grain_dict(pc_model:dict, history:dict, indexes:list) -> dict:
     Creates a dictionary of grain information
 
     Parameters:
-    * `strain_list`: The list of strain values
-    * `pc_model`:    The polycrystal model
-    * `history`:     The history of the model simulation
-    * `indexes`:     The grain indexes to include in the dictionary
+    * `pc_model`: The polycrystal model
+    * `history`:  The history of the model simulation
+    * `indexes`:  The grain indexes to include in the dictionary
     
     Returns the dictionary of euler-bunge angles (rads)
     """
     
-    # Initialise
-    grain_dict = {"phi_1_start": [], "phi_1_end": [], "Phi_start": [],
-                  "Phi_end": [], "phi_2_start": [], "phi_2_end": []}
-    
     # Iterate through each grain
-    for i in indexes:
-        euler_list = [[], [], []]
+    grain_dict = {}
+    for i in range(len(indexes)):
         
+        # Initialise
+        grain_dict[f"g{i+1}_phi1"] = []
+        grain_dict[f"g{i+1}_phi"]  = []
+        grain_dict[f"g{i+1}_phi2"] = []
+
         # Get the trajectory of each grain throughout history
+        euler_list = [[], [], []]
         for state in history:
             orientations = pc_model.orientations(state)
-            euler = list(orientations[i].to_euler(angle_type="radians", convention="bunge"))
+            euler = list(orientations[indexes[i]].to_euler(angle_type="radians", convention="bunge"))
             for j in range(len(euler_list)):
                 euler_list[j].append(euler[j])
 
-        # Store the trajectories as polynomials
-        grain_dict["phi_1_start"].append(euler_list[0][0]) 
-        grain_dict["phi_1_end"].append(euler_list[0][-1])
-        grain_dict["Phi_start"].append(euler_list[1][0])
-        grain_dict["Phi_end"].append(euler_list[1][-1])
-        grain_dict["phi_2_start"].append(euler_list[2][0])
-        grain_dict["phi_2_end"].append(euler_list[2][-1])
+        # Store the trajectories
+        grain_dict[f"g{i+1}_phi1"] = euler_list[0]
+        grain_dict[f"g{i+1}_phi"]  = euler_list[1]
+        grain_dict[f"g{i+1}_phi2"] = euler_list[2]
     
     # Return dictionary
     return grain_dict
 
-def get_top(value_list:list, num_values:int) -> tuple:
+def get_top(value_list:list, num_values:int=TOP_GRAINS) -> tuple:
     """
     Gets the top values and indexes of a list of values
 
@@ -220,17 +219,13 @@ def get_top(value_list:list, num_values:int) -> tuple:
 # Define the model
 model = Model(GRAINS_PATH, 1.0, [1,1,1], [1,1,0])
 
-# Grab command line arguments for parallelism
-index_1 = int(sys.argv[1])
-index_2 = int(sys.argv[2])
-
 # Define parameter domains
 all_params_dict = {
-    "tau_sat": [[50, 100, 200, 400, 800, 1600][index_2]],
-    "b":       [0.1, 0.2, 0.4, 0.8, 1.6, 3.2, 6.4, 12.8, 25.6, 51.2],
-    "tau_0":   [50, 100, 200, 400, 800],
+    "tau_sat": [700],
+    "b":       [15],
+    "tau_0":   [300],
     "gamma_0": [round_sf(STRAIN_RATE/3, 4)],
-    "n":       [[2, 4, 8, 16][index_1]],
+    "n":       [5.5],
 }
 
 # Get combinations of domains
@@ -239,7 +234,7 @@ combinations = list(itertools.product(*param_list))
 combinations = [list(c) for c in combinations]
 
 # Get information about 10 biggest grains
-top_weights, top_indexes = get_top(model.get_weights(), 10)
+top_weights, top_indexes = get_top(model.get_weights(), TOP_GRAINS)
 
 # Iterate through the parameters
 param_names = list(all_params_dict.keys())
@@ -248,7 +243,7 @@ for i in range(len(combinations)):
     # Initialise
     index_str = str(i+1).zfill(3)
     param_dict = dict(zip(param_names, combinations[i]))
-    results_path = f"results/{index_1}_{index_2}_{index_str}"
+    results_path = f"results/once"
 
     # Prepare the thread for the function
     model.define_params(**param_dict)

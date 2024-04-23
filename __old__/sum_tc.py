@@ -6,8 +6,8 @@ from scipy.interpolate import splev, splrep
 # Constants
 X_HEADER        = "strain"
 Y_HEADER        = "stress"
-NUM_POINTS      = 30
-PARAM_NAME_LIST = ["tau_sat", "b", "tau_0", "gamma_0", "n"]
+NUM_POINTS      = 20
+PARAM_NAME_LIST = ["tau_sat", "b", "tau_0", "gamma_0", "n", "cd", "beta"]
 
 def get_thinned_list(unthinned_list:list, density:int) -> list:
     """
@@ -173,7 +173,7 @@ for key in failure_keys:
 
 # Read all CSV files and iterate through them
 # results_dir = "../results"
-results_dir = "/mnt/c/Users/Janzen/OneDrive - UNSW/PhD/results/cp_neml/20240423 (tensile wo dmg)"
+results_dir = "/mnt/c/Users/Janzen/OneDrive - UNSW/PhD/results/cp_neml/20240422 (tensile)"
 csv_file_list = [file for file in os.listdir(results_dir) if file.endswith(".csv")]
 
 # # Only retrieve a subset of the CSVs (for debugging)
@@ -224,11 +224,11 @@ for csv_file in csv_file_list:
         success_dict[f"y_{i+1}"].append(round_sf(y_list[i], 5))
 
 # Write results
-dict_to_csv(failure_dict, "failures.csv")
-dict_to_csv(success_dict, "tc.csv")
+dict_to_csv(failure_dict, "tc_failure.csv")
+dict_to_csv(success_dict, "tc_success.csv")
 
 # Format and save plot for fits
-plt.xlim(0.0, 0.5)
+plt.xlim(0.0, 1.0)
 plt.ylim(0.0, None)
 plt.xlabel("Strain (mm/mm)")
 plt.ylabel("Stress (MPa)")

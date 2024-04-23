@@ -6,7 +6,7 @@ X_HEADER        = "strain"
 PHI_HEADERS     = ["phi_1", "Phi", "phi_2"]
 GRAIN_INDEX     = 0
 NUM_POINTS      = 10
-PARAM_NAME_LIST = ["tau_sat", "b", "tau_0", "gamma_0", "n"]
+PARAM_NAME_LIST = ["tau_sat", "b", "tau_0", "gamma_0", "n", "cd", "beta"]
 
 def csv_to_dict(csv_path:str, delimeter:str=",") -> dict:
     """
@@ -95,16 +95,29 @@ def round_sf(value:float, sf:int) -> float:
     rounded_value = float(format_str.format(value))
     return rounded_value
 
+def append_list_dict(list_dict:dict, value_dict:dict) -> dict:
+    """
+    Appends values from a dictionary to lists in another dictionary
+    
+    Parameters:
+    * `list_dict`:  The dictionary of lists
+    * `value_dict`: The dictionary of values
+
+    Returnns the new dictionary
+    """
+    for key in value_dict.keys():
+        list_dict[key].append(value_dict[key])
+    return list_dict
+
 # Initialise success dictionary
-get_names = lambda label : [f"{label}_{i+1}" for i in range(NUM_POINTS)]
-success_keys = PARAM_NAME_LIST + get_names("phi_1") + get_names("Phi") + get_names("phi_2")
+success_keys = PARAM_NAME_LIST + ["phi"] + [f"y_{i+1}" for i in range(NUM_POINTS)]
 success_dict = {}
 for key in success_keys:
     success_dict[key] = []
 
 # Read all CSV files and iterate through them
 # results_dir = "../results"
-results_dir = "/mnt/c/Users/Janzen/OneDrive - UNSW/PhD/results/cp_neml/20240423 (tensile wo dmg)"
+results_dir = "/mnt/c/Users/Janzen/OneDrive - UNSW/PhD/results/cp_neml/20240422 (tensile)"
 csv_file_list = [file for file in os.listdir(results_dir) if file.endswith(".csv")]
 
 # # Only retrieve a subset of the CSVs (for debugging)
@@ -131,8 +144,8 @@ for csv_file in csv_file_list:
         continue
 
     # Add parameter information
-    for key in param_dict.keys():
-        success_dict[key].append(param_dict[key])
+    for _ in range(3):
+        success_dict = append_list_dict(success_dict, param_dict)
 
     # Get the trajectories for one of the grains
     poly_str_list = [data_dict[header][GRAIN_INDEX] for header in PHI_HEADERS]
@@ -140,11 +153,12 @@ for csv_file in csv_file_list:
     
     # Get points on each trajectory and add to success dictionary
     for i in range(len(poly_list)):
-        x_list = data_dict[X_HEADER]
+        x_end = len(data_dict[X_HEADER])
+        x_list = [x_end/(NUM_POINTS-1)*j for j in range(NUM_POINTS)]
         y_list = np.polyval(poly_list[i], x_list)
-        for j in range(NUM_POINTS):
-            key = f"{['phi_1', 'Phi', 'phi_2'][i]}_{j+1}"
-            success_dict[key].append(round_sf(y_list[j], 5))
+        success_dict["phi"].append(i+1)
+        for i in range(NUM_POINTS):
+            success_dict[f"y_{i+1}"].append(round_sf(y_list[i], 5))
 
 # Write results
-dict_to_csv(success_dict, f"g{GRAIN_INDEX+1}_phi.csv")
+dict_to_csv(success_dict, "phi_success.csv")

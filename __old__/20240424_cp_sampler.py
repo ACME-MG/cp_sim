@@ -1,6 +1,6 @@
 
 # Libraries
-import numpy as np, itertools
+import math, numpy as np, itertools
 import sys, threading
 from neml.math import rotations
 from neml.cp import crystallography, slipharden, sliprules, inelasticity, kinematics, singlecrystal, polycrystal, crystaldamage
@@ -148,7 +148,7 @@ def dict_to_csv(data_dict:dict, csv_path:str) -> None:
         csv_fh.write(row_str + "\n")
     csv_fh.close()
 
-def get_grain_dict(pc_model:dict, history:dict, indexes:list) -> dict:
+def get_grain_dict(strain_list:list, pc_model:dict, history:dict, indexes:list) -> dict:
     """
     Creates a dictionary of grain information
 
@@ -161,11 +161,8 @@ def get_grain_dict(pc_model:dict, history:dict, indexes:list) -> dict:
     Returns the dictionary of euler-bunge angles (rads)
     """
     
-    # Initialise
-    grain_dict = {"phi_1_start": [], "phi_1_end": [], "Phi_start": [],
-                  "Phi_end": [], "phi_2_start": [], "phi_2_end": []}
-    
     # Iterate through each grain
+    grain_dict = {"phi_1": [], "Phi": [], "phi_2": []}
     for i in indexes:
         euler_list = [[], [], []]
         
@@ -177,12 +174,10 @@ def get_grain_dict(pc_model:dict, history:dict, indexes:list) -> dict:
                 euler_list[j].append(euler[j])
 
         # Store the trajectories as polynomials
-        grain_dict["phi_1_start"].append(euler_list[0][0]) 
-        grain_dict["phi_1_end"].append(euler_list[0][-1])
-        grain_dict["Phi_start"].append(euler_list[1][0])
-        grain_dict["Phi_end"].append(euler_list[1][-1])
-        grain_dict["phi_2_start"].append(euler_list[2][0])
-        grain_dict["phi_2_end"].append(euler_list[2][-1])
+        for j in range(len(euler_list)):
+            polynomial = list(np.polyfit(strain_list, euler_list[j], 5))
+            polynomial_str = " ".join([str(round_sf(coef, 5)) for coef in polynomial])
+            grain_dict[["phi_1", "Phi", "phi_2"][j]].append(polynomial_str)
     
     # Return dictionary
     return grain_dict
@@ -226,11 +221,11 @@ index_2 = int(sys.argv[2])
 
 # Define parameter domains
 all_params_dict = {
-    "tau_sat": [[50, 100, 200, 400, 800, 1600][index_2]],
-    "b":       [0.1, 0.2, 0.4, 0.8, 1.6, 3.2, 6.4, 12.8, 25.6, 51.2],
-    "tau_0":   [50, 100, 200, 400, 800],
+    "tau_sat": [1, 500, 1000, 1500, 2000], # too high
+    "b":       [[0.1, 1, 10, 100][index_1]],
+    "tau_0":   [[50, 100, 200, 400, 800, 1600][index_2]], # too high
     "gamma_0": [round_sf(STRAIN_RATE/3, 4)],
-    "n":       [[2, 4, 8, 16][index_1]],
+    "n":       [1, 2, 4, 8, 16],
 }
 
 # Get combinations of domains
@@ -276,7 +271,7 @@ for i in range(len(combinations)):
 
     # Get grain and stress information
     history = np.array(results["history"])
-    grain_dict = get_grain_dict(pc_model, history, top_indexes)
+    grain_dict = get_grain_dict(strain_list, pc_model, history, top_indexes)
 
     # Compile results and write to CSV file
     combined_dict = {**param_dict, **data_dict, **grain_dict}
