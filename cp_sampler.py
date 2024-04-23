@@ -276,4 +276,3 @@ for i in range(len(combinations)):
     # Compile results and write to CSV file
     combined_dict = {**param_dict, **data_dict, **grain_dict}
     dict_to_csv(combined_dict, f"{results_path}.csv")
-    exit()
