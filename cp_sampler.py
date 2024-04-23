@@ -1,17 +1,17 @@
 
 # Libraries
-import numpy as np, itertools
+import math, numpy as np, itertools
 import sys, threading
 from neml.math import rotations
 from neml.cp import crystallography, slipharden, sliprules, inelasticity, kinematics, singlecrystal, polycrystal, crystaldamage
 from neml import elasticity, drivers
 
 # Constants
-MAX_TIME    = 600 # seconds
-NUM_THREADS = 12
+MAX_TIME    = 300 # seconds
+NUM_THREADS = 8
 GRAINS_PATH = "grain_data.csv"
 STRAIN_RATE = 1.0e-4
-MAX_STRAIN  = 1.0
+MAX_STRAIN  = 0.5
 YOUNGS      = 211000
 POISSONS    = 0.30
 LATTICE     = 1.0
@@ -62,7 +62,7 @@ class Model:
         e_model = elasticity.IsotropicLinearElasticModel(YOUNGS, "youngs", POISSONS, "poissons")
         return e_model
 
-    def define_params(self, tau_sat:float, b:float, tau_0:float, gamma_0:float, n:float, cd:float, beta:float) -> None:
+    def define_params(self, tau_sat:float, b:float, tau_0:float, gamma_0:float, n:float) -> None:
         """
         Defines the parameters for the model
 
@@ -72,16 +72,12 @@ class Model:
         * `tau_0`:   VoceSlipHardening parameter
         * `gamma_0`: AsaroInelasticity parameter
         * `n`:       AsaroInelasticity parameter
-        * `cd`:      Critical damage value
-        * `beta`:    Abruptness of damage onset
         """
         self.tau_sat = tau_sat
         self.b = b
         self.tau_0 = tau_0
         self.gamma_0 = gamma_0
         self.n = n
-        self.cd = cd
-        self.beta = beta
 
     def run_cp(self) -> None:
         """
@@ -92,17 +88,14 @@ class Model:
         
         # Get the results
         try:
-            e_model    = self.get_elastic_model()
-            str_model  = slipharden.VoceSlipHardening(self.tau_sat, self.b, self.tau_0)
-            slip_model = sliprules.PowerLawSlipRule(str_model, self.gamma_0, self.n)
-            i_model    = inelasticity.AsaroInelasticity(slip_model)
-            dm_model   = crystaldamage.WorkPlaneDamage()
-            dm_func    = crystaldamage.SigmoidTransformation(self.cd, self.beta)
-            dm_planar  = crystaldamage.PlanarDamageModel(dm_model, dm_func, dm_func, self.lattice)
-            dm_k_model = kinematics.DamagedStandardKinematicModel(e_model, i_model, dm_planar)
-            sc_model   = singlecrystal.SingleCrystalModel(dm_k_model, self.lattice)
-            pc_model   = polycrystal.TaylorModel(sc_model, self.orientations, nthreads=NUM_THREADS, weights=self.weights)
-            results    = drivers.uniaxial_test(pc_model, STRAIN_RATE, emax=MAX_STRAIN, nsteps=200, rtol=1e-6, atol=1e-10, miter=25, verbose=False, full_results=True)
+            e_model        = self.get_elastic_model()
+            strength_model = slipharden.VoceSlipHardening(self.tau_sat, self.b, self.tau_0)
+            slip_model     = sliprules.PowerLawSlipRule(strength_model, self.gamma_0, self.n)
+            i_model        = inelasticity.AsaroInelasticity(slip_model)
+            k_model        = kinematics.StandardKinematicModel(e_model, i_model)
+            sc_model       = singlecrystal.SingleCrystalModel(k_model, self.lattice, miter=16, max_divide=2, verbose=False)
+            pc_model       = polycrystal.TaylorModel(sc_model, self.orientations, nthreads=NUM_THREADS, weights=self.weights) # problem
+            results        = drivers.uniaxial_test(pc_model, STRAIN_RATE, emax=MAX_STRAIN, nsteps=200, rtol=1e-6, atol=1e-10, miter=25, verbose=False, full_results=True)
             self.model_output = (sc_model, pc_model, results)
         except:
             self.model_output = None
@@ -155,14 +148,15 @@ def dict_to_csv(data_dict:dict, csv_path:str) -> None:
         csv_fh.write(row_str + "\n")
     csv_fh.close()
 
-def get_grain_dict(pc_model:dict, history:dict, indexes:list) -> dict:
+def get_grain_dict(strain_list:list, pc_model:dict, history:dict, indexes:list) -> dict:
     """
     Creates a dictionary of grain information
 
     Parameters:
-    * `pc_model`: The polycrystal model
-    * `history`:  The history of the model simulation
-    * `indexes`:  The grain indexes to include in the dictionary
+    * `strain_list`: The list of strain values
+    * `pc_model`:    The polycrystal model
+    * `history`:     The history of the model simulation
+    * `indexes`:     The grain indexes to include in the dictionary
     
     Returns the dictionary of euler-bunge angles (rads)
     """
@@ -181,41 +175,12 @@ def get_grain_dict(pc_model:dict, history:dict, indexes:list) -> dict:
 
         # Store the trajectories as polynomials
         for j in range(len(euler_list)):
-            index_list = list(range(len(euler_list[j])))
-            polynomial = list(np.polyfit(index_list, euler_list[j], 5))
+            polynomial = list(np.polyfit(strain_list, euler_list[j], 5))
             polynomial_str = " ".join([str(round_sf(coef, 5)) for coef in polynomial])
             grain_dict[["phi_1", "Phi", "phi_2"][j]].append(polynomial_str)
     
     # Return dictionary
     return grain_dict
-
-def get_stress_dict(pc_model:dict, history:dict, indexes:list) -> dict:
-    """
-    Creates a dictionary of stress information
-
-    Parameters:
-    * `pc_model`: The polycrystal model
-    * `history`:  The history of the model simulation
-    * `indexes`:  The grain indexes to include in the dictionary
-    
-    Returns the dictionary of stress values
-    """
-
-    # Get stress information
-    stress_history = history[:,pc_model.n*sc_model.nstore:pc_model.n*sc_model.nstore+6*pc_model.n:6]
-    stress_grid    = [list(stress_list) for stress_list in stress_history]
-    
-    # Get stress trajectories for each grain
-    stress_dict = {"grain_stress": []}
-    for i in indexes:
-        stress_list = [stress_grid[j][i] for j in range(len(history))]
-        index_list = list(range(len(stress_list)))
-        polynomial = list(np.polyfit(index_list, stress_list, 6))
-        polynomial_str = " ".join([str(round_sf(coef, 5)) for coef in polynomial])
-        stress_dict["grain_stress"].append(polynomial_str)
-    
-    # Returns the dictionary
-    return stress_dict
 
 def get_top(value_list:list, num_values:int) -> tuple:
     """
@@ -260,9 +225,7 @@ all_params_dict = {
     "b":       [[0.1, 1, 10, 100][index_1]],
     "tau_0":   [50, 150, 250, 350, 450],
     "gamma_0": [round_sf(STRAIN_RATE/3, 4)],
-    "n":       [1, 2, 3, 4, 5],
-    "cd":      [200, 400, 600, 800, 1000],
-    "beta":    [[5, 10, 15, 20][index_2]],
+    "n":       [[1, 2, 4, 8, 16][index_2]],
 }
 
 # Get combinations of domains
@@ -308,9 +271,9 @@ for i in range(len(combinations)):
 
     # Get grain and stress information
     history = np.array(results["history"])
-    grain_dict = get_grain_dict(pc_model, history, top_indexes)
-    # stress_dict = get_stress_dict(pc_model, history, top_indexes)
+    grain_dict = get_grain_dict(strain_list, pc_model, history, top_indexes)
 
     # Compile results and write to CSV file
     combined_dict = {**param_dict, **data_dict, **grain_dict}
     dict_to_csv(combined_dict, f"{results_path}.csv")
+    exit()
