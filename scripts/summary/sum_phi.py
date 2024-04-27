@@ -4,9 +4,8 @@ import numpy as np, os
 # Constants
 X_HEADER        = "strain"
 PHI_HEADERS     = ["phi_1", "Phi", "phi_2"]
-GRAIN_INDEX     = 0
-NUM_POINTS      = 10
-PARAM_NAME_LIST = ["tau_sat", "b", "tau_0", "gamma_0", "n", "cd", "beta"]
+NUM_GRAINS      = 5
+PARAM_NAME_LIST = ["tau_sat", "b", "tau_0", "gamma_0", "n"]
 
 def csv_to_dict(csv_path:str, delimeter:str=",") -> dict:
     """
@@ -95,29 +94,15 @@ def round_sf(value:float, sf:int) -> float:
     rounded_value = float(format_str.format(value))
     return rounded_value
 
-def append_list_dict(list_dict:dict, value_dict:dict) -> dict:
-    """
-    Appends values from a dictionary to lists in another dictionary
-    
-    Parameters:
-    * `list_dict`:  The dictionary of lists
-    * `value_dict`: The dictionary of values
-
-    Returnns the new dictionary
-    """
-    for key in value_dict.keys():
-        list_dict[key].append(value_dict[key])
-    return list_dict
-
 # Initialise success dictionary
-success_keys = PARAM_NAME_LIST + ["phi"] + [f"y_{i+1}" for i in range(NUM_POINTS)]
+success_keys = PARAM_NAME_LIST + [f"g{i+1}_{label}_{pos}" for i in range(NUM_GRAINS)
+                                  for label in ["phi_1", "Phi", "phi_2"] for pos in ["start", "end"]]
 success_dict = {}
 for key in success_keys:
     success_dict[key] = []
 
 # Read all CSV files and iterate through them
-# results_dir = "../results"
-results_dir = "/mnt/c/Users/Janzen/OneDrive - UNSW/PhD/results/cp_neml/20240422 (tensile)"
+results_dir = "/mnt/c/Users/Janzen/OneDrive - UNSW/PhD/results/cp_neml/20240426 (tensile linear ot)"
 csv_file_list = [file for file in os.listdir(results_dir) if file.endswith(".csv")]
 
 # # Only retrieve a subset of the CSVs (for debugging)
@@ -144,21 +129,15 @@ for csv_file in csv_file_list:
         continue
 
     # Add parameter information
-    for _ in range(3):
-        success_dict = append_list_dict(success_dict, param_dict)
+    for key in param_dict.keys():
+        success_dict[key].append(param_dict[key])
 
-    # Get the trajectories for one of the grains
-    poly_str_list = [data_dict[header][GRAIN_INDEX] for header in PHI_HEADERS]
-    poly_list = [[float(coef) for coef in poly_str.split(" ")] for poly_str in poly_str_list]
-    
-    # Get points on each trajectory and add to success dictionary
-    for i in range(len(poly_list)):
-        x_end = len(data_dict[X_HEADER])
-        x_list = [x_end/(NUM_POINTS-1)*j for j in range(NUM_POINTS)]
-        y_list = np.polyval(poly_list[i], x_list)
-        success_dict["phi"].append(i+1)
-        for i in range(NUM_POINTS):
-            success_dict[f"y_{i+1}"].append(round_sf(y_list[i], 5))
+    # Gets the start and end points of the trajectory and store
+    for i in range(NUM_GRAINS):
+        for label in ["phi_1", "Phi", "phi_2"]:
+            for pos in ["start", "end"]:
+                value = round_sf(data_dict[f"{label}_{pos}"][i], 5)
+                success_dict[f"g{i+1}_{label}_{pos}"].append(value)
 
 # Write results
-dict_to_csv(success_dict, "phi_success.csv")
+dict_to_csv(success_dict, f"phi.csv")

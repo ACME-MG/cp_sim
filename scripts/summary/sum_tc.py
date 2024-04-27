@@ -6,8 +6,8 @@ from scipy.interpolate import splev, splrep
 # Constants
 X_HEADER        = "strain"
 Y_HEADER        = "stress"
-NUM_POINTS      = 20
-PARAM_NAME_LIST = ["tau_sat", "b", "tau_0", "gamma_0", "n", "cd", "beta"]
+NUM_POINTS      = 30
+PARAM_NAME_LIST = ["tau_sat", "b", "tau_0", "gamma_0", "n"]
 
 def get_thinned_list(unthinned_list:list, density:int) -> list:
     """
@@ -153,7 +153,7 @@ def append_list_dict(list_dict:dict, value_dict:dict) -> dict:
     * `list_dict`:  The dictionary of lists
     * `value_dict`: The dictionary of values
 
-    Returnns the new dictionary
+    Returns the new dictionary
     """
     for key in value_dict.keys():
         list_dict[key].append(value_dict[key])
@@ -172,8 +172,7 @@ for key in failure_keys:
     failure_dict[key] = []
 
 # Read all CSV files and iterate through them
-# results_dir = "../results"
-results_dir = "/mnt/c/Users/Janzen/OneDrive - UNSW/PhD/results/cp_neml/20240422 (tensile)"
+results_dir = "/mnt/c/Users/Janzen/OneDrive - UNSW/PhD/results/cp_neml/20240426 (tensile linear ot)"
 csv_file_list = [file for file in os.listdir(results_dir) if file.endswith(".csv")]
 
 # # Only retrieve a subset of the CSVs (for debugging)
@@ -224,11 +223,11 @@ for csv_file in csv_file_list:
         success_dict[f"y_{i+1}"].append(round_sf(y_list[i], 5))
 
 # Write results
-dict_to_csv(failure_dict, "tc_failure.csv")
-dict_to_csv(success_dict, "tc_success.csv")
+dict_to_csv(failure_dict, "failures.csv")
+dict_to_csv(success_dict, "tc.csv")
 
 # Format and save plot for fits
-plt.xlim(0.0, 1.0)
+plt.xlim(0.0, 0.5)
 plt.ylim(0.0, None)
 plt.xlabel("Strain (mm/mm)")
 plt.ylabel("Stress (MPa)")
