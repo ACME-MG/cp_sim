@@ -10,7 +10,8 @@ import numpy as np
 import sys; sys.path += [".."]
 from cp_sampler.model import Model, STRAIN_RATE
 from cp_sampler.helper import round_sf, get_top
-from cp_sampler.pole_figure import IPF, save_plot, get_trajectories
+from cp_sampler.pole_figure import IPF, get_trajectories
+from cp_sampler.plotter import Plotter, save_plot, define_legend
 
 # Constants
 MAX_TIME    = 300 # seconds
@@ -73,28 +74,34 @@ param_dict_2 = {
 }
 
 # Initialises the model and plotter
-model = Model(GRAINS_PATH, 1.0, [1,1,1], [1,1,0])
+model = Model(GRAINS_PATH, "fcc", 1.0)
 _, top_indexes = get_top(model.get_weights(), TOP_GRAINS)
-direction = [[1,0,0], [1,1,0], [1,1,1]][0]
+direction = [[1,0,0], [0,1,0], [0,0,1]][0]
 ipf = IPF(model.get_lattice())
 
-# Plot the orientations for the first set of parameters
-model.define_params(**param_dict_1)
-model.run_cp()
-history = model.get_orientation_history()
-trajectories = get_trajectories(history, top_indexes)
-ipf.plot_ipf_trajectory(trajectories, direction, {"color": "darkgray"}, scatter=True)
+# Run both sets of parameters
+_, _, results_1 = model.get_results_direct(param_dict_1)
+history_1 = model.get_orientation_history()
+_, _, results_2 = model.get_results_direct(param_dict_2)
+history_2 = model.get_orientation_history()
 
-# Plot the orientations for the second set of parameters
-model.define_params(**param_dict_2)
-model.run_cp()
-history = model.get_orientation_history()
-trajectories = get_trajectories(history, top_indexes[:5])
+# Plot the tensile curves
+plotter = Plotter(x_label="strain", y_label="stress")
+data_dict_1 = {"strain": [round_sf(s[0], 5) for s in results_1["strain"]], "stress": [round_sf(s[0], 5) for s in results_1["stress"]]}
+data_dict_2 = {"strain": [round_sf(s[0], 5) for s in results_2["strain"]], "stress": [round_sf(s[0], 5) for s in results_2["stress"]]}
+plotter.scat_plot(data_dict_1)
+plotter.line_plot(data_dict_2)
+define_legend(["darkgray", "green"], ["Experimental", "Calibration"], [7, 1.5], ["scatter", "line"])
+save_plot("plot_ss.png")
+
+# Plot the reorientation trajectories
+trajectories = get_trajectories(history_1, top_indexes)
+ipf.plot_ipf_trajectory(trajectories, direction, {"color": "darkgray"}, scatter=True)
+trajectories = get_trajectories(history_2, top_indexes[:5])
 ipf.plot_ipf_trajectory([[t[0]] for t in trajectories], direction, {"color": "green"}, scatter=True)
 ipf.plot_ipf_trajectory(trajectories, direction, {"color": "green"}, scatter=False)
-trajectories = get_trajectories(history, top_indexes[5:])
+trajectories = get_trajectories(history_2, top_indexes[5:])
 ipf.plot_ipf_trajectory([[t[0]] for t in trajectories], direction, {"color": "red"}, scatter=True)
 ipf.plot_ipf_trajectory(trajectories, direction, {"color": "red"}, scatter=False)
-
-# Save the plot
-save_plot("ipf_trajectories.png")
+define_legend(["darkgray", "green", "red"], ["Experimental", "Calibration", "Validation"], [7, 1.5, 1.5], ["scatter", "line", "line"])
+save_plot(f"plot_ipf_{''.join([str(d) for d in direction])}.png")

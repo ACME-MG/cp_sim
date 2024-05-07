@@ -13,7 +13,7 @@ from cp_sampler.helper import round_sf, dict_to_csv, get_top, get_combinations
 
 # Constants
 MAX_TIME    = 300 # seconds
-GRAINS_PATH = "data/grain_data.csv"
+GRAINS_PATH = "data/grain_p91.csv"
 LATTICE     = 1.0
 TOP_GRAINS  = 10
 
@@ -61,14 +61,14 @@ index_1 = int(sys.argv[1])
 index_2 = int(sys.argv[2])
 all_params_dict = {
     "tau_sat": [[50, 100, 200, 400, 800, 1600][index_2]],
-    "b":       [0.1, 0.2, 0.4, 0.8, 1.6, 3.2, 6.4, 12.8, 25.6, 51.2],
+    "b":       [0.1, 0.2, 0.4, 0.8, 1.6, 3.2, 6.4, 12.8, 25.6],
     "tau_0":   [50, 100, 200, 400, 800],
     "gamma_0": [round_sf(STRAIN_RATE/3, 4)],
     "n":       [[2, 4, 8, 16][index_1]],
 }
 
 # Initialise model and top grain weights
-model = Model(GRAINS_PATH, 1.0, [1,1,1], [1,1,0])
+model = Model(GRAINS_PATH, "bcc", 1.3)
 top_weights, top_indexes = get_top(model.get_weights(), TOP_GRAINS)
 
 # Iterate through the parameters

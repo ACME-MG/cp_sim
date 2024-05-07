@@ -13,7 +13,7 @@ from cp_sampler.helper import round_sf, dict_to_csv, get_top
 
 # Constants
 MAX_TIME    = 300 # seconds
-GRAINS_PATH = "data/grain_data.csv"
+GRAINS_PATH = "data/grain_p91.csv"
 LATTICE     = 1.0
 TOP_GRAINS  = 10
 
@@ -63,16 +63,9 @@ param_dict = {
     "gamma_0": round_sf(STRAIN_RATE/3, 4),
     "n":       3.8835,
 }
-# all_params_dict = {
-#     "tau_sat": 700,
-#     "b":       15,
-#     "tau_0":   300,
-#     "gamma_0": round_sf(STRAIN_RATE/3, 4),
-#     "n":       5.5,
-# }
 
 # Define and run the model
-model = Model(GRAINS_PATH, 1.0, [1,1,1], [1,1,0])
+model = Model(GRAINS_PATH, "bcc", 1.3)
 model.define_params(**param_dict)
 model.run_cp()
 sc_model, pc_model, results = model.get_results()

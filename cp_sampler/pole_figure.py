@@ -16,30 +16,30 @@ from cp_sampler.helper import flatten
 # Pole figure class
 class PF:
     
-    def __init__(self, lattice, sample_direction:list=[2,2,2], x_direction=[1.0,0,0], y_direction=[0,1.0,0]):
+    def __init__(self, lattice, sample_symmetry:list=[2,2,2], x_direction=[1.0,0,0], y_direction=[0,1.0,0]):
         """
         Constructor for PF class
         
         Parameters:
-        * `lattice`:          The lattice object
-        * `sample_direction`: Sample direction of the projection
-        * `x_direction`:    X crystallographic direction of the projection
-        * `y_direction`:    Y crystallographic direction of the projection
+        * `lattice`:         The lattice object
+        * `sample_symmetry`: Sample direction of the projection
+        * `x_direction`:     X crystallographic direction of the projection
+        * `y_direction`:     Y crystallographic direction of the projection
         """
         self.lattice = lattice
-        sample_direction_str = "".join([str(ss) for ss in sample_direction])
-        self.sample_symmetry = crystallography.symmetry_rotations(sample_direction_str)
+        sample_symmetry_str = "".join([str(ss) for ss in sample_symmetry])
+        self.sample_symmetry = crystallography.symmetry_rotations(sample_symmetry_str)
         self.x_direction = [float(x) for x in x_direction]
         self.y_direction = [float(y) for y in y_direction]
 
-    def plot_pf(self, euler_list:list, direction:list, colour_list:list=None, size_list:list=None) -> None:
+    def plot_pf(self, euler_list:list, plane:list, colour_list:list=None, size_list:list=None) -> None:
         """
         Plots a standard pole figure using a stereographic projection;
         only works for cubic structures
 
         Parameters:
         * `euler_list`:  The list of orientations in euler-bunge form (rads)
-        * `direction`:   Direction of the projection
+        * `plane`:       Plane of the projection
         * `colour_list`: List of values to define the colouring scheme
         * `size_list`:   List of values to define the sizing scheme
 
@@ -53,7 +53,7 @@ class PF:
         # Get the standard rotationn and equivalent poles
         standard_rotation = rotations.Orientation(tensors.Vector(self.x_direction),
                                                   tensors.Vector(self.y_direction))
-        poles = self.lattice.miller2cart_direction(direction)
+        poles = self.lattice.miller2cart_direction(plane)
         eq_poles = self.lattice.equivalent_vectors(poles)
         eq_poles = [pole.normalize() for pole in eq_poles]
         eq_poles = [op.apply(p) for p in eq_poles for op in self.sample_symmetry] # gets points on the sphere
@@ -63,7 +63,7 @@ class PF:
         axis = plt.subplot(111, projection="polar")
         axis.grid(False)
         axis.get_yaxis().set_visible(False)
-        plt.xticks([0, np.pi/2], ["x", "y"])
+        plt.xticks([0, np.pi/2], ["RD", "TD"])
         
         # Iterate through the orientations
         for i, euler in enumerate(euler_list):
@@ -85,19 +85,19 @@ class PF:
 # Inverse pole figure class
 class IPF:
 
-    def __init__(self, lattice, sample_direction:list=[2,2,2], x_direction=[1,0,0], y_direction=[0,1,0]):
+    def __init__(self, lattice, sample_symmetry:list=[2,2,2], x_direction=[1,0,0], y_direction=[0,1,0]):
         """
         Constructor for IPF class
 
         Parameters:
-        * `lattice`:          The lattice object
-        * `sample_direction`: Sample direction of the projection
-        * `x_direction`:    X crystallographic direction of the projection
-        * `y_direction`:    Y crystallographic direction of the projection
+        * `lattice`:         The lattice object
+        * `sample_symmetry`: Sample direction of the projection
+        * `x_direction`:     X crystallographic direction of the projection
+        * `y_direction`:     Y crystallographic direction of the projection
         """
         self.lattice = lattice
-        sample_direction_str = "".join([str(ss) for ss in sample_direction])
-        self.sample_symmetry = crystallography.symmetry_rotations(sample_direction_str)
+        sample_symmetry_str = "".join([str(ss) for ss in sample_symmetry])
+        self.sample_symmetry = crystallography.symmetry_rotations(sample_symmetry_str)
         self.vectors = (np.array([0,0,1.0]), np.array([1.0,0,1]), np.array([1.0,1,1])) # force float
         self.norm_vectors = [vector / np.linalg.norm(np.array(vector)) for vector in self.vectors]
         self.x_direction = [int(x) for x in x_direction]
@@ -253,17 +253,6 @@ def get_trajectories(euler_history:list, index_list:list=None) -> list:
         trajectory = [euler_state[i] for euler_state in euler_history]
         trajectories.append(trajectory)
     return trajectories
-
-def save_plot(plot_name) -> None:
-    """
-    Saves the plot and clears the figure
-
-    Parameters:
-    * `plot_name`: The name of the plot
-    """
-    plt.savefig(plot_name)
-    plt.cla()
-    plt.close()
 
 def get_colours(orientations:list, values:list) -> list:
     """

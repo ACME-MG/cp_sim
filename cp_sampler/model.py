@@ -21,16 +21,14 @@ POISSONS    = 0.30
 # Model class
 class Model:
 
-    def __init__(self, grains_path:str, lattice_a:int=1, slip_plane:list=[1,1,1],
-                 slip_direction:list=[1,1,0]):
+    def __init__(self, grains_path:str, structure:str="fcc", lattice_a:int=1.0):
         """
-        Constructor for the RunModel class
+        Constructor for the Model class
 
         Parameters:
-        * `grains_path`:    Path to the grains file (in euler-bunge notation)
-        * `lattice_a`:      The lattice type (slip=0, twin=1)
-        * `slip_plane`:     The plane of the slip system
-        * `slip_direction`: The direction of the slip system
+        * `grains_path`: Path to the grains file (in euler-bunge notation)
+        * `structure`:   Crystal structure ("bcc" or "fcc")
+        * `lattice_a`:   The lattice parameter (a)
         """
 
         # Create grain information
@@ -40,7 +38,12 @@ class Model:
         
         # Create lattice
         self.lattice = crystallography.CubicLattice(lattice_a)
-        self.lattice.add_slip_system(slip_direction, slip_plane)
+        if structure == "fcc":
+            self.lattice.add_slip_system([1,1,0], [1,1,1])
+        elif structure == "bcc":
+            self.lattice.add_slip_system([1,1,1], [1,1,0])
+            self.lattice.add_slip_system([1,1,1], [1,2,3])
+            self.lattice.add_slip_system([1,1,1], [1,1,2])
 
         # Initialise results
         self.model_output = None
