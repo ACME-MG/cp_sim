@@ -6,7 +6,7 @@
 """
 
 # Libraries
-import itertools, numpy as np
+import itertools, numpy as np, math
 
 def round_sf(value:float, sf:int) -> float:
     """
@@ -103,24 +103,8 @@ def get_top(value_list:list, num_values:int) -> tuple:
 
     Returns the list of top values and indexes
     """
-    top_value_list = []
-    top_index_list = []
-    for i in range(len(value_list)):
-        value = value_list[i]
-        if len(top_value_list) == 0:
-            top_value_list.append(value)
-            top_index_list.append(i)
-            continue
-        if value < top_value_list[-1] and len(top_value_list) == num_values:
-            continue
-        for j in range(len(top_value_list)):
-            if value > top_value_list[j]:
-                top_value_list.insert(j, value)
-                top_index_list.insert(j, i)
-                break
-        if len(top_value_list) > num_values:
-            top_value_list.pop(-1)
-            top_index_list.pop(-1)
+    top_value_list = sorted(value_list, reverse=True)[:num_values]
+    top_index_list = [value_list.index(value) for value in top_value_list][:num_values]
     return top_value_list, top_index_list
 
 def get_combinations(params_dict:dict) -> list:
@@ -159,3 +143,29 @@ def flatten(list_of_lists:list) -> list:
     Returns the flattened list
     """
     return [item for sublist in list_of_lists for item in sublist]
+
+def rad_to_deg(radians:float) -> float:
+    """
+    Converts radians to degrees
+
+    Parameters:
+    * `radians`: The radians to be converted
+
+    Returns the converted degrees
+    """
+    if isinstance(radians, list):
+        return [rad_to_deg(r) for r in radians]
+    return radians * 180 / math.pi
+
+def deg_to_rad(degrees:float) -> float:
+    """
+    Converts degrees to radians
+
+    Parameters:
+    * `degrees`: The degrees to be converted
+
+    Returns the converted radians
+    """
+    if isinstance(degrees, list):
+        return [deg_to_rad(d) for d in degrees]
+    return degrees * math.pi / 180

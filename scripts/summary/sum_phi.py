@@ -1,5 +1,5 @@
 # Libraries
-import numpy as np, os
+import os, math
 
 # Constants
 X_HEADER        = "strain"
@@ -102,7 +102,7 @@ for key in success_keys:
     success_dict[key] = []
 
 # Read all CSV files and iterate through them
-results_dir = "/mnt/c/Users/Janzen/OneDrive - UNSW/PhD/results/cp_neml/20240426 (tensile linear ot)"
+results_dir = "/mnt/c/Users/Janzen/OneDrive - UNSW/PhD/results/cp_neml/20240508 (tensile bcc)"
 csv_file_list = [file for file in os.listdir(results_dir) if file.endswith(".csv")]
 
 # # Only retrieve a subset of the CSVs (for debugging)
@@ -136,7 +136,8 @@ for csv_file in csv_file_list:
     for i in range(NUM_GRAINS):
         for label in ["phi_1", "Phi", "phi_2"]:
             for pos in ["start", "end"]:
-                value = round_sf(data_dict[f"{label}_{pos}"][i], 5)
+                value = data_dict[f"{label}_{pos}"][i]
+                value = round_sf(value if value > 0 else value + 2*math.pi, 5)
                 success_dict[f"g{i+1}_{label}_{pos}"].append(value)
 
 # Write results

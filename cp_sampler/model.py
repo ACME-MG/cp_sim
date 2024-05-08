@@ -33,7 +33,7 @@ class Model:
 
         # Create grain information
         grain_stats = np.loadtxt(grains_path, delimiter=",")
-        self.orientations = [rotations.CrystalOrientation(gs[0], gs[1], gs[2], angle_type="degrees", convention="bunge") for gs in grain_stats]
+        self.orientations = [rotations.CrystalOrientation(gs[0], gs[1], gs[2], angle_type="radians", convention="bunge") for gs in grain_stats]
         self.weights = [gs[3] for gs in grain_stats]
         
         # Create lattice

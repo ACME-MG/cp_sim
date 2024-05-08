@@ -240,7 +240,7 @@ def get_trajectories(euler_history:list, index_list:list=None) -> list:
     Converts a history of euler angles into a list of trajectories
 
     Parameters:
-    * `euler_history`: The history of orientations in euler-bunge form (rds)
+    * `euler_history`: The history of orientations in euler-bunge form (rads)
     * `index_list`:    The list of indexes to include; if undefined, includes
                        all the trajectories
 
