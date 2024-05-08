@@ -56,6 +56,12 @@ def get_grain_dict(pc_model:dict, history:dict, indexes:list) -> dict:
     # Return dictionary
     return grain_dict
 
+# Initialises the model and plotter
+model = Model(GRAINS_PATH, "bcc", 1.3)
+_, top_indexes = get_top(model.get_weights(), TOP_GRAINS)
+direction = [[1,0,0], [0,1,0], [0,0,1]][0]
+ipf = IPF(model.get_lattice())
+
 # Gets the experimental data
 exp_path = "/mnt/c/Users/Janzen/OneDrive - UNSW/PhD/data/20240506 (ondrej_P91)/tensile_p91.csv"
 exp_dict = csv_to_dict(exp_path)
@@ -70,24 +76,16 @@ for i in range(1,num_grains+1):
     exp_history[0].append([phi_1[0], Phi[0], phi_2[0]])
     exp_history[1].append([phi_1[-1], Phi[-1], phi_2[-1]])
 
-# Define parameter domains
-param_dict_1 = {
-    "tau_sat": 700,
-    "b":       15,
-    "tau_0":   300,
+# Get simulated results
+param_dict = {
+    "tau_sat": 50.039,
+    "b":       25.486,
+    "tau_0":   182.49,
     "gamma_0": round_sf(STRAIN_RATE/3, 4),
-    "n":       5.5,
+    "n":       12.054,
 }
-
-# Initialises the model and plotter
-model = Model(GRAINS_PATH, "bcc", 1.3)
-_, top_indexes = get_top(model.get_weights(), TOP_GRAINS)
-direction = [[1,0,0], [0,1,0], [0,0,1]][0]
-ipf = IPF(model.get_lattice())
-
-# # Run both sets of parameters
-# _, _, results_1 = model.get_results_direct(param_dict_1)
-# history_1 = model.get_orientation_history()
+_, _, sim_results = model.get_results_direct(param_dict)
+sim_history = model.get_orientation_history()
 
 # # Plot the tensile curves
 # plotter = Plotter(x_label="strain", y_label="stress")
@@ -96,19 +94,18 @@ ipf = IPF(model.get_lattice())
 # define_legend(["darkgray", "green"], ["Experimental", "Calibration"], [7, 1.5], ["scatter", "line"])
 # save_plot("plot_ss.png")
 
-
 # Plot the experimental reorientation trajectories
 exp_trajectories = get_trajectories(exp_history, list(range(10)))
-ipf.plot_ipf_trajectory(exp_trajectories, direction, {"color": "darkgray", "linewidth": 3}, scatter=False)
+ipf.plot_ipf_trajectory(exp_trajectories, direction, {"color": "darkgray"}, scatter=False)
 exp_trajectories = [[et[0]] for et in exp_trajectories]
 ipf.plot_ipf_trajectory(exp_trajectories, direction, {"color": "darkgray", "s": 8**2}, scatter=True)
 
 # Plot the simulated reorientation trajectories
-# trajectories = get_trajectories(history_2, top_indexes[:5])
-# ipf.plot_ipf_trajectory([[t[0]] for t in trajectories], direction, {"color": "green"}, scatter=True)
-# ipf.plot_ipf_trajectory(trajectories, direction, {"color": "green"}, scatter=False)
-# trajectories = get_trajectories(history_2, top_indexes[5:])
-# ipf.plot_ipf_trajectory([[t[0]] for t in trajectories], direction, {"color": "red"}, scatter=True)
-# ipf.plot_ipf_trajectory(trajectories, direction, {"color": "red"}, scatter=False)
-# define_legend(["darkgray", "green", "red"], ["Experimental", "Calibration", "Validation"], [7, 1.5, 1.5], ["scatter", "line", "line"])
+trajectories = get_trajectories(sim_history, top_indexes[:5])
+ipf.plot_ipf_trajectory([[t[0]] for t in trajectories], direction, {"color": "green"}, scatter=True)
+ipf.plot_ipf_trajectory(trajectories, direction, {"color": "green"}, scatter=False)
+trajectories = get_trajectories(sim_history, top_indexes[5:10])
+ipf.plot_ipf_trajectory([[t[0]] for t in trajectories], direction, {"color": "red"}, scatter=True)
+ipf.plot_ipf_trajectory(trajectories, direction, {"color": "red"}, scatter=False)
+define_legend(["darkgray", "green", "red"], ["Experimental", "Calibration", "Validation"], [7, 1.5, 1.5], ["scatter", "line", "line"])
 save_plot(f"plot_ipf_{''.join([str(d) for d in direction])}.png")
