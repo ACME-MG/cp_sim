@@ -8,7 +8,7 @@
 # Libraries
 import numpy as np
 import sys; sys.path += [".."]
-from cp_sampler.model import Model, STRAIN_RATE
+from cp_sampler.models.cp import Model, STRAIN_RATE
 from cp_sampler.helper import round_sf, get_top
 from cp_sampler.pole_figure import IPF, get_trajectories
 from cp_sampler.plotter import Plotter, save_plot, define_legend

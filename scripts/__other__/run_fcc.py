@@ -8,7 +8,7 @@
 # Libraries
 import numpy as np
 import sys; sys.path += [".."]
-from cp_sampler.model import Model, STRAIN_RATE
+from cp_sampler.models.cp import Model, STRAIN_RATE
 from cp_sampler.helper import round_sf, dict_to_csv, get_top
 
 # Constants

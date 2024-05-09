@@ -8,7 +8,7 @@
 # Libraries
 import numpy as np
 import sys; sys.path += [".."]
-from cp_sampler.model import Model, STRAIN_RATE
+from cp_sampler.models.cp import Model, STRAIN_RATE
 from cp_sampler.helper import round_sf, get_sorted, csv_to_dict
 from cp_sampler.pole_figure import IPF, get_trajectories
 from cp_sampler.plotter import Plotter, save_plot, define_legend
@@ -89,11 +89,12 @@ _, _, sim_results = model.get_results_direct(param_dict)
 sim_history = model.get_orientation_history()
 
 # Plot the tensile curves
-# plotter = Plotter(x_label="strain", y_label="stress")
-# data_dict_1 = {"strain": [round_sf(s[0], 5) for s in sim_results["strain"]], "stress": [round_sf(s[0], 5) for s in results_1["stress"]]}
-# plotter.scat_plot(data_dict_1)
-# define_legend(["darkgray", "green"], ["Experimental", "Calibration"], [7, 1.5], ["scatter", "line"])
-# save_plot("plot_ss.png")
+plotter = Plotter(x_label="strain", y_label="stress")
+plotter.scat_plot(exp_dict)
+data_dict = {"strain": [round_sf(s[0], 5) for s in sim_results["strain"]], "stress": [round_sf(s[0], 5) for s in sim_results["stress"]]}
+plotter.line_plot(data_dict)
+define_legend(["darkgray", "green"], ["Experimental", "Calibration"], [7, 1.5], ["scatter", "line"])
+save_plot("plot_ss.png")
 
 # Plot the experimental reorientation trajectories
 exp_trajectories = get_trajectories(exp_history, list(range(VALID_GRAINS)))

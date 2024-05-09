@@ -1,6 +1,6 @@
 """
- Title:         Model
- Description:   Contains a Crystal Plasticity model implemented in NEML
+ Title:         Crystal Platicity Damage Model
+ Description:   Contains a Crystal Plasticity model coupled with a damage model implemented in NEML
  Author:        Janzen Choi
 
 """
@@ -8,7 +8,7 @@
 # Libraries
 import numpy as np
 from neml.math import rotations
-from neml.cp import crystallography, slipharden, sliprules, inelasticity, kinematics, singlecrystal, polycrystal
+from neml.cp import crystallography, slipharden, sliprules, inelasticity, kinematics, singlecrystal, polycrystal, crystaldamage
 from neml import elasticity, drivers
 
 # Constants
@@ -67,7 +67,7 @@ class Model:
         e_model = elasticity.IsotropicLinearElasticModel(YOUNGS, "youngs", POISSONS, "poissons")
         return e_model
 
-    def define_params(self, tau_sat:float, b:float, tau_0:float, gamma_0:float, n:float) -> None:
+    def define_params(self, tau_sat:float, b:float, tau_0:float, gamma_0:float, n:float, cd:float, beta:float) -> None:
         """
         Defines the parameters for the model
 
@@ -77,12 +77,16 @@ class Model:
         * `tau_0`:   VoceSlipHardening parameter
         * `gamma_0`: AsaroInelasticity parameter
         * `n`:       AsaroInelasticity parameter
+        * `cd`:      Critical damage value
+        * `beta`:    Abruptness of damage onset
         """
         self.tau_sat = tau_sat
         self.b = b
         self.tau_0 = tau_0
         self.gamma_0 = gamma_0
         self.n = n
+        self.cd = cd
+        self.beta = beta
 
     def run_cp(self) -> None:
         """
@@ -93,14 +97,17 @@ class Model:
         
         # Get the results
         try:
-            e_model     = self.get_elastic_model()
-            str_model   = slipharden.VoceSlipHardening(self.tau_sat, self.b, self.tau_0)
-            slip_model  = sliprules.PowerLawSlipRule(str_model, self.gamma_0, self.n)
-            i_model     = inelasticity.AsaroInelasticity(slip_model)
-            k_model     = kinematics.StandardKinematicModel(e_model, i_model)
-            sc_model    = singlecrystal.SingleCrystalModel(k_model, self.lattice, miter=16, max_divide=2, verbose=False)
-            pc_model    = polycrystal.TaylorModel(sc_model, self.orientations, nthreads=NUM_THREADS, weights=self.weights) # problem
-            results     = drivers.uniaxial_test(pc_model, STRAIN_RATE, emax=MAX_STRAIN, nsteps=200, rtol=1e-6, atol=1e-10, miter=25, verbose=False, full_results=True)
+            e_model    = self.get_elastic_model()
+            str_model  = slipharden.VoceSlipHardening(self.tau_sat, self.b, self.tau_0)
+            slip_model = sliprules.PowerLawSlipRule(str_model, self.gamma_0, self.n)
+            i_model    = inelasticity.AsaroInelasticity(slip_model)
+            dm_model   = crystaldamage.WorkPlaneDamage()
+            dm_func    = crystaldamage.SigmoidTransformation(self.cd, self.beta)
+            dm_planar  = crystaldamage.PlanarDamageModel(dm_model, dm_func, dm_func, self.lattice)
+            dm_k_model = kinematics.DamagedStandardKinematicModel(e_model, i_model, dm_planar)
+            sc_model   = singlecrystal.SingleCrystalModel(dm_k_model, self.lattice, miter=16, max_divide=2, verbose=False)
+            pc_model   = polycrystal.TaylorModel(sc_model, self.orientations, nthreads=NUM_THREADS, weights=self.weights)
+            results    = drivers.uniaxial_test(pc_model, STRAIN_RATE, emax=MAX_STRAIN, nsteps=200, rtol=1e-6, atol=1e-10, miter=25, verbose=False, full_results=True)
             self.model_output = (sc_model, pc_model, results)
         except:
             self.model_output = None
