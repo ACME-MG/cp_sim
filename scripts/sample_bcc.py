@@ -9,7 +9,7 @@
 import numpy as np, threading
 import sys; sys.path += [".."]
 from cp_sampler.model import Model, STRAIN_RATE
-from cp_sampler.helper import round_sf, dict_to_csv, get_top, get_combinations
+from cp_sampler.helper import round_sf, dict_to_csv, get_sorted, get_combinations
 
 # Constants
 MAX_TIME    = 300 # seconds
@@ -68,8 +68,8 @@ all_params_dict = {
 }
 
 # Initialise model and top grain weights
-model = Model(GRAINS_PATH, "bcc", 1.3)
-top_weights, top_indexes = get_top(model.get_weights(), TOP_GRAINS)
+model = Model(GRAINS_PATH, "bcc", 1.0)
+top_weights, sorted_indexes = get_sorted(model.get_weights())
 
 # Iterate through the parameters
 combinations = get_combinations(all_params_dict)
@@ -107,7 +107,7 @@ for i in range(len(combinations)):
 
     # Get grain and stress information
     history = np.array(results["history"])
-    grain_dict = get_grain_dict(pc_model, history, top_indexes)
+    grain_dict = get_grain_dict(pc_model, history, sorted_indexes[:TOP_GRAINS])
 
     # Compile results and write to CSV file
     combined_dict = {**param_dict, **data_dict, **grain_dict}

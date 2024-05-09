@@ -217,23 +217,26 @@ class IPF:
             colour = rgb_colours[i] if colour_list != None else None
             plot_points(axis, points, size, colour)
 
-    def plot_ipf_trajectory(self, trajectories:list, direction:list, settings:dict={}, scatter:bool=True) -> None:
+    def plot_ipf_trajectory(self, trajectories:list, direction:list, function:str="scatter", settings:dict={}) -> None:
         """
         Plot an inverse pole figure to display the reorientation trajectories
 
         Parameters:
         * `trajectories`: The list of reorientation trajectories
         * `direction`:    Direction of the projection
+        * `function`      Function to plot points
         * `settings`:     The plotting settings
-        * `scatter`:      Whether to plot the points as a scatter or line points
         
         Plots the IPF of the reorientation trajectories
         """
         axis = self.initialise_ipf()
         for trajectory in trajectories:
             points = np.array(flatten([self.get_points(euler, direction) for euler in trajectory]))
-            plotter = axis.scatter if scatter else axis.plot
-            plotter(points[:,0], points[:,1], **settings)
+            if function == "arrow": # experimental
+                axis.arrow(points[-3,0], points[-3,1], points[-1,0]-points[-3,0], points[-1,1]-points[-3,1], **settings)
+            else:
+                plotter = getattr(axis, function)
+                plotter(points[:,0], points[:,1], **settings)
 
 def get_trajectories(euler_history:list, index_list:list=None) -> list:
     """

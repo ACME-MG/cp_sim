@@ -93,19 +93,23 @@ def csv_to_dict(csv_path:str, delimeter:str=",") -> dict:
     # Return
     return csv_dict
 
-def get_top(value_list:list, num_values:int) -> tuple:
+def get_sorted(value_list:list, reverse:bool=True) -> tuple:
     """
     Gets the top values and indexes of a list of values
-
+    
     Parameters:
     * `value_list`: The list of values
-    * `num_values`: The number of values to return
-
+    
     Returns the list of top values and indexes
     """
-    top_value_list = sorted(value_list, reverse=True)[:num_values]
-    top_index_list = [value_list.index(value) for value in top_value_list][:num_values]
-    return top_value_list, top_index_list
+    sorted_value_list = sorted(value_list, reverse=reverse)
+    sorted_index_list = []
+    for value in sorted_value_list:
+        for i in range(len(value_list)):
+            if value == value_list[i] and not i in sorted_index_list:
+                sorted_index_list.append(i)
+                break
+    return sorted_value_list, sorted_index_list
 
 def get_combinations(params_dict:dict) -> list:
     """

@@ -9,7 +9,7 @@
 import numpy as np
 import sys; sys.path += [".."]
 from cp_sampler.model import Model, STRAIN_RATE
-from cp_sampler.helper import round_sf, dict_to_csv, get_top
+from cp_sampler.helper import round_sf, dict_to_csv, get_sorted
 
 # Constants
 MAX_TIME    = 300 # seconds
@@ -65,7 +65,7 @@ param_dict = {
 }
 
 # Define and run the model
-model = Model(GRAINS_PATH, "bcc", 1.3)
+model = Model(GRAINS_PATH, "bcc", 1.0)
 model.define_params(**param_dict)
 model.run_cp()
 sc_model, pc_model, results = model.get_results()
@@ -80,8 +80,8 @@ data_dict = {
 
 # Get grain and stress information
 history = np.array(results["history"])
-_, top_indexes = get_top(model.get_weights(), TOP_GRAINS)
-grain_dict = get_grain_dict(pc_model, history, top_indexes)
+_, sorted_indexes = get_sorted(model.get_weights())
+grain_dict = get_grain_dict(pc_model, history, sorted_indexes[:TOP_GRAINS])
 
 # Compile results and write to CSV file
 combined_dict = {**param_dict, **data_dict, **grain_dict}
