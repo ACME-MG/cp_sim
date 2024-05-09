@@ -9,13 +9,14 @@
 import numpy as np, threading
 import sys; sys.path += [".."]
 from cp_sampler.models.cp import Model, STRAIN_RATE
-from cp_sampler.helper import round_sf, dict_to_csv, get_sorted, get_combinations
+from cp_sampler.helper import round_sf, dict_to_csv, get_combinations, csv_to_dict
 
 # Constants
-MAX_TIME    = 300 # seconds
-GRAINS_PATH = "data/grain_p91.csv"
-LATTICE     = 1.0
-TOP_GRAINS  = 10
+MAX_TIME     = 300 # seconds
+GRAINS_PATH  = "data/grain_p91.csv"
+MAPPING_PATH = "data/mapping_p91.csv"
+LATTICE      = 1.0
+TOP_GRAINS   = 10
 
 def get_grain_dict(pc_model:dict, history:dict, indexes:list) -> dict:
     """
@@ -69,7 +70,9 @@ all_params_dict = {
 
 # Initialise model and top grain weights
 model = Model(GRAINS_PATH, "bcc", 1.0)
-top_weights, sorted_indexes = get_sorted(model.get_weights())
+map_dict = csv_to_dict(MAPPING_PATH)
+sorted_indexes = list(map_dict["start"])
+sorted_indexes = [int(si)-1 for si in sorted_indexes]
 
 # Iterate through the parameters
 combinations = get_combinations(all_params_dict)
