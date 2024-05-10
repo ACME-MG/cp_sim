@@ -135,6 +135,7 @@ class Model:
         for state in history:
             orientation_list = []
             for orientation in pc_model.orientations(state):
-                orientation_list.append(list(orientation.to_euler(angle_type="radians", convention="bunge")))
+                inverse = orientation.inverse()
+                orientation_list.append(list(inverse.to_euler(angle_type="radians", convention="bunge")))
             orientation_history.append(orientation_list)
         return orientation_history

@@ -147,29 +147,3 @@ def flatten(list_of_lists:list) -> list:
     Returns the flattened list
     """
     return [item for sublist in list_of_lists for item in sublist]
-
-def rad_to_deg(radians:float) -> float:
-    """
-    Converts radians to degrees
-
-    Parameters:
-    * `radians`: The radians to be converted
-
-    Returns the converted degrees
-    """
-    if isinstance(radians, list):
-        return [rad_to_deg(r) for r in radians]
-    return radians * 180 / math.pi
-
-def deg_to_rad(degrees:float) -> float:
-    """
-    Converts degrees to radians
-
-    Parameters:
-    * `degrees`: The degrees to be converted
-
-    Returns the converted radians
-    """
-    if isinstance(degrees, list):
-        return [deg_to_rad(d) for d in degrees]
-    return degrees * math.pi / 180

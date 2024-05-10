@@ -6,10 +6,11 @@
 """
 
 # Libraries
-import numpy as np, threading
+import threading
 import sys; sys.path += [".."]
 from cp_sampler.models.cp import Model, STRAIN_RATE
 from cp_sampler.helper import round_sf, dict_to_csv, get_combinations, csv_to_dict
+import math
 
 # Constants
 MAX_TIME     = 300 # seconds
@@ -18,43 +19,24 @@ MAPPING_PATH = "data/mapping_p91.csv"
 LATTICE      = 1.0
 TOP_GRAINS   = 10
 
-def get_grain_dict(pc_model:dict, history:dict, indexes:list) -> dict:
+def get_grain_dict(history:list, indexes:list) -> dict:
     """
     Creates a dictionary of grain information
 
     Parameters:
-    * `strain_list`: The list of strain values
-    * `pc_model`:    The polycrystal model
-    * `history`:     The history of the model simulation
-    * `indexes`:     The grain indexes to include in the dictionary
+    * `history`: The orientation history
+    * `indexes`: The grain indexes to include in the dictionary
     
     Returns the dictionary of euler-bunge angles (rads)
     """
-    
-    # Initialise
     grain_dict = {"phi_1_start": [], "phi_1_end": [], "Phi_start": [],
                   "Phi_end": [], "phi_2_start": [], "phi_2_end": []}
-    
-    # Iterate through each grain
+    domain = lambda x_list : [x if x>0 else x+2*math.pi for x in x_list]
     for i in indexes:
-        euler_list = [[], [], []]
-        
-        # Get the trajectory of each grain throughout history
-        for state in history:
-            orientations = pc_model.orientations(state)
-            euler = list(orientations[i].to_euler(angle_type="radians", convention="bunge"))
-            for j in range(len(euler_list)):
-                euler_list[j].append(euler[j])
-
-        # Store the trajectories as polynomials
-        grain_dict["phi_1_start"].append(euler_list[0][0]) 
-        grain_dict["phi_1_end"].append(euler_list[0][-1])
-        grain_dict["Phi_start"].append(euler_list[1][0])
-        grain_dict["Phi_end"].append(euler_list[1][-1])
-        grain_dict["phi_2_start"].append(euler_list[2][0])
-        grain_dict["phi_2_end"].append(euler_list[2][-1])
-    
-    # Return dictionary
+        for j, key in enumerate(["phi_1_start", "Phi_start", "phi_2_start"]):
+            grain_dict[key].append(domain(history[0][i][j]))
+        for j, key in enumerate(["phi_1_end", "Phi_end", "phi_2_end"]):
+            grain_dict[key].append(domain(history[-1][i][j]))
     return grain_dict
 
 # Define parameter domains
@@ -109,8 +91,8 @@ for i in range(len(combinations)):
     }
 
     # Get grain and stress information
-    history = np.array(results["history"])
-    grain_dict = get_grain_dict(pc_model, history, sorted_indexes[:TOP_GRAINS])
+    history = model.get_orientation_history()
+    grain_dict = get_grain_dict(history, sorted_indexes[:TOP_GRAINS])
 
     # Compile results and write to CSV file
     combined_dict = {**param_dict, **data_dict, **grain_dict}

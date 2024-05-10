@@ -1,5 +1,6 @@
 # Libraries
 import os, math
+from neml.math import rotations
 
 # Constants
 X_HEADER        = "strain"
@@ -94,6 +95,12 @@ def round_sf(value:float, sf:int) -> float:
     rounded_value = float(format_str.format(value))
     return rounded_value
 
+def reorient(euler:list) -> list:
+    orientation = rotations.CrystalOrientation(euler[0], euler[1], euler[2], angle_type="radians", convention="bunge")
+    inverse = orientation.inverse()
+    new_euler = inverse.to_euler(angle_type="radians", convention="bunge")
+    return new_euler
+
 # Initialise success dictionary
 success_keys = PARAM_NAME_LIST + [f"g{i+1}_{label}_{pos}" for i in range(NUM_GRAINS)
                                   for label in ["phi_1", "Phi", "phi_2"] for pos in ["start", "end"]]
@@ -102,7 +109,7 @@ for key in success_keys:
     success_dict[key] = []
 
 # Read all CSV files and iterate through them
-results_dir = "/mnt/c/Users/Janzen/OneDrive - UNSW/PhD/results/cp_neml/20240508 (tensile bcc)"
+results_dir = "/mnt/c/Users/Janzen/OneDrive - UNSW/PhD/results/cp_neml/20240510 (tensile bcc)"
 csv_file_list = [file for file in os.listdir(results_dir) if file.endswith(".csv")]
 
 # # Only retrieve a subset of the CSVs (for debugging)
@@ -131,6 +138,14 @@ for csv_file in csv_file_list:
     # Add parameter information
     for key in param_dict.keys():
         success_dict[key].append(param_dict[key])
+
+    # Remove if oriented correctly
+    for i in range(NUM_GRAINS):
+        for pos in ["start", "end"]:
+            euler = [data_dict[key][i] for key in [f"phi_1_{pos}", f"Phi_{pos}", f"phi_2_{pos}"]]
+            new_euler = reorient(euler)
+            for j, label in enumerate(["phi_1", "Phi", "phi_2"]):
+                data_dict[f"{label}_{pos}"][i] = new_euler[j]
 
     # Gets the start and end points of the trajectory and store
     for i in range(NUM_GRAINS):
