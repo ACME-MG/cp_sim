@@ -12,7 +12,6 @@ from neml.cp import crystallography, slipharden, sliprules, inelasticity, kinema
 from neml import elasticity, drivers
 
 # Constants
-NUM_THREADS = 8
 STRAIN_RATE = 1.0e-4
 MAX_STRAIN  = 0.5
 YOUNGS      = 211000
@@ -21,7 +20,7 @@ POISSONS    = 0.30
 # Model class
 class Model:
 
-    def __init__(self, grains_path:str, structure:str="fcc", lattice_a:int=1.0):
+    def __init__(self, grains_path:str, structure:str="fcc", lattice_a:int=1.0, num_threads:int=5):
         """
         Constructor for the Model class
 
@@ -29,6 +28,7 @@ class Model:
         * `grains_path`: Path to the grains file (in euler-bunge notation)
         * `structure`:   Crystal structure ("bcc" or "fcc")
         * `lattice_a`:   The lattice parameter (a)
+        * `num_threads`: Number of threads to use to run the model
         """
 
         # Create grain information
@@ -45,7 +45,8 @@ class Model:
             self.lattice.add_slip_system([1,1,1], [1,2,3])
             self.lattice.add_slip_system([1,1,1], [1,1,2])
 
-        # Initialise results
+        # Initialise others
+        self.num_threads = num_threads
         self.model_output = None
 
     def get_lattice(self) -> crystallography.CubicLattice:
@@ -99,7 +100,7 @@ class Model:
             i_model     = inelasticity.AsaroInelasticity(slip_model)
             k_model     = kinematics.StandardKinematicModel(e_model, i_model)
             sc_model    = singlecrystal.SingleCrystalModel(k_model, self.lattice, miter=16, max_divide=2, verbose=False)
-            pc_model    = polycrystal.TaylorModel(sc_model, self.orientations, nthreads=NUM_THREADS, weights=self.weights) # problem
+            pc_model    = polycrystal.TaylorModel(sc_model, self.orientations, nthreads=self.num_threads, weights=self.weights) # problem
             results     = drivers.uniaxial_test(pc_model, STRAIN_RATE, emax=MAX_STRAIN, nsteps=200, rtol=1e-6, atol=1e-10, miter=25, verbose=False, full_results=True)
             self.model_output = (sc_model, pc_model, results)
         except:
@@ -125,9 +126,14 @@ class Model:
         self.run_cp()
         return self.get_results()
 
-    def get_orientation_history(self) -> list:
+    def get_orientation_history(self, inverse:bool=True) -> list:
         """
-        Returns the orientation history in euler-bunge form (rads)
+        Gets the orientation history in euler-bunge form (rads)
+
+        Parameters:
+        * `inverse`: Whether to invert the orientations or not
+
+        Returns the orientation history
         """
         pc_model, results = self.model_output[1], self.model_output[2]
         history = np.array(results["history"])
@@ -135,7 +141,23 @@ class Model:
         for state in history:
             orientation_list = []
             for orientation in pc_model.orientations(state):
-                inverse = orientation.inverse()
-                orientation_list.append(list(inverse.to_euler(angle_type="radians", convention="bunge")))
+                euler = list(orientation.to_euler(angle_type="radians", convention="bunge"))
+                if inverse:
+                    euler = reorient(euler)
+                orientation_list.append(euler)
             orientation_history.append(orientation_list)
         return orientation_history
+
+def reorient(euler:list) -> list:
+    """
+    Inverts the euler angle
+
+    Parameters:
+    * `euler`: The euler angle
+
+    Returns the inverted euler angle
+    """
+    orientation = rotations.CrystalOrientation(euler[0], euler[1], euler[2], angle_type="radians", convention="bunge")
+    inverse = orientation.inverse()
+    new_euler = inverse.to_euler(angle_type="radians", convention="bunge")
+    return new_euler

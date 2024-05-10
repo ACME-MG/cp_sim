@@ -224,7 +224,7 @@ for csv_file in csv_file_list:
 
 # Write results
 dict_to_csv(failure_dict, "failures.csv")
-dict_to_csv(success_dict, "tc.csv")
+dict_to_csv(success_dict, "tc_bcc.csv")
 
 # Format and save plot for fits
 plt.xlim(0.0, 0.5)

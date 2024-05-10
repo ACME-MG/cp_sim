@@ -9,13 +9,14 @@
 import numpy as np
 import sys; sys.path += [".."]
 from cp_sampler.models.cp import Model, STRAIN_RATE
-from cp_sampler.helper import round_sf, get_sorted, csv_to_dict
+from cp_sampler.helper import round_sf, csv_to_dict
 from cp_sampler.pole_figure import IPF, get_trajectories
 from cp_sampler.plotter import Plotter, save_plot, define_legend
 
 # Constants
 MAX_TIME     = 300 # seconds
 GRAINS_PATH  = "data/grain_p91.csv"
+MAPPING_PATH = "data/mapping_p91.csv"
 CALIB_GRAINS = 5
 VALID_GRAINS = 10
 
@@ -59,9 +60,13 @@ def get_grain_dict(pc_model:dict, history:dict, indexes:list) -> dict:
 
 # Initialises the model and plotter
 model = Model(GRAINS_PATH, "bcc", 1.0)
-_, sorted_indexes = get_sorted(model.get_weights())
 direction = [[1,0,0], [0,1,0], [0,0,1]][1]
 ipf = IPF(model.get_lattice())
+
+# Initialise indexes for grains to capture
+map_dict = csv_to_dict(MAPPING_PATH)
+sorted_indexes = list(map_dict["start"])
+sorted_indexes = [int(si)-1 for si in sorted_indexes]
 
 # Gets the experimental data
 exp_path = "data/tensile_p91.csv"
@@ -79,11 +84,11 @@ for i in range(1,num_grains+1):
 
 # Get simulated results
 param_dict = {
-    "tau_sat": 50.039,
-    "b":       25.486,
-    "tau_0":   182.49,
+    "tau_sat": 65.701,
+    "b":       7.4369,
+    "tau_0":   262.12,
     "gamma_0": round_sf(STRAIN_RATE/3, 4),
-    "n":       12.054,
+    "n":       2.0456,
 }
 _, _, sim_results = model.get_results_direct(param_dict)
 sim_history = model.get_orientation_history()
@@ -110,9 +115,9 @@ ipf.plot_ipf_trajectory([[st[0]] for st in sim_trajectories], direction, "scatte
 
 # Plot the validaiton reorientation trajectories
 sim_trajectories = get_trajectories(sim_history, sorted_indexes[CALIB_GRAINS:VALID_GRAINS])
-ipf.plot_ipf_trajectory(sim_trajectories, direction, "plot", {"color": "red", "linewidth": 1})
-ipf.plot_ipf_trajectory(sim_trajectories, direction, "arrow", {"color": "red", "head_width": 0.0075, "head_length": 0.0075*1.5})
-ipf.plot_ipf_trajectory([[st[0]] for st in sim_trajectories], direction, "scatter", {"color": "red", "s": 6**2})
+# ipf.plot_ipf_trajectory(sim_trajectories, direction, "plot", {"color": "red", "linewidth": 1})
+# ipf.plot_ipf_trajectory(sim_trajectories, direction, "arrow", {"color": "red", "head_width": 0.0075, "head_length": 0.0075*1.5})
+# ipf.plot_ipf_trajectory([[st[0]] for st in sim_trajectories], direction, "scatter", {"color": "red", "s": 6**2})
 
 # Format and save
 define_legend(["darkgray", "green", "red"], ["Experimental", "Calibration", "Validation"], [7, 1.5, 1.5], ["scatter", "line", "line"])

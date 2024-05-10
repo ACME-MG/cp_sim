@@ -156,4 +156,4 @@ for csv_file in csv_file_list:
                 success_dict[f"g{i+1}_{label}_{pos}"].append(value)
 
 # Write results
-dict_to_csv(success_dict, f"phi.csv")
+dict_to_csv(success_dict, f"phi_bcc.csv")

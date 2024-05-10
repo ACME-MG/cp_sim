@@ -12,7 +12,6 @@ from neml.cp import crystallography, slipharden, sliprules, inelasticity, kinema
 from neml import elasticity, drivers
 
 # Constants
-NUM_THREADS = 8
 STRAIN_RATE = 1.0e-4
 MAX_STRAIN  = 0.5
 YOUNGS      = 211000
@@ -21,7 +20,7 @@ POISSONS    = 0.30
 # Model class
 class Model:
 
-    def __init__(self, grains_path:str, structure:str="fcc", lattice_a:int=1.0):
+    def __init__(self, grains_path:str, structure:str="fcc", lattice_a:int=1.0, num_threads:int=5):
         """
         Constructor for the Model class
 
@@ -29,6 +28,7 @@ class Model:
         * `grains_path`: Path to the grains file (in euler-bunge notation)
         * `structure`:   Crystal structure ("bcc" or "fcc")
         * `lattice_a`:   The lattice parameter (a)
+        * `num_threads`: Number of threads to use to run the model
         """
 
         # Create grain information
@@ -45,7 +45,8 @@ class Model:
             self.lattice.add_slip_system([1,1,1], [1,2,3])
             self.lattice.add_slip_system([1,1,1], [1,1,2])
 
-        # Initialise results
+        # Initialise others
+        self.num_threads = num_threads
         self.model_output = None
 
     def get_lattice(self) -> crystallography.CubicLattice:
@@ -106,7 +107,7 @@ class Model:
             dm_planar  = crystaldamage.PlanarDamageModel(dm_model, dm_func, dm_func, self.lattice)
             dm_k_model = kinematics.DamagedStandardKinematicModel(e_model, i_model, dm_planar)
             sc_model   = singlecrystal.SingleCrystalModel(dm_k_model, self.lattice, miter=16, max_divide=2, verbose=False)
-            pc_model   = polycrystal.TaylorModel(sc_model, self.orientations, nthreads=NUM_THREADS, weights=self.weights)
+            pc_model   = polycrystal.TaylorModel(sc_model, self.orientations, nthreads=self.num_threads, weights=self.weights)
             results    = drivers.uniaxial_test(pc_model, STRAIN_RATE, emax=MAX_STRAIN, nsteps=200, rtol=1e-6, atol=1e-10, miter=25, verbose=False, full_results=True)
             self.model_output = (sc_model, pc_model, results)
         except:
