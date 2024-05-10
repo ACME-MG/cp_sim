@@ -31,7 +31,7 @@ def get_grain_dict(history:list, indexes:list) -> dict:
     """
     grain_dict = {"phi_1_start": [], "phi_1_end": [], "Phi_start": [],
                   "Phi_end": [], "phi_2_start": [], "phi_2_end": []}
-    domain = lambda x_list : [x if x>0 else x+2*math.pi for x in x_list]
+    domain = lambda x : x if x>0 else x+2*math.pi
     for i in indexes:
         for j, key in enumerate(["phi_1_start", "Phi_start", "phi_2_start"]):
             grain_dict[key].append(domain(history[0][i][j]))
@@ -43,11 +43,11 @@ def get_grain_dict(history:list, indexes:list) -> dict:
 index_1 = int(sys.argv[1])
 index_2 = int(sys.argv[2])
 all_params_dict = {
-    "tau_sat": [[50, 100, 200, 400, 800, 1600][index_2]],
-    "b":       [0.1, 0.2, 0.4, 0.8, 1.6, 3.2, 6.4, 12.8, 25.6, 51.2],
+    "tau_sat": [[25, 50, 100, 200, 400, 800][index_2]],
+    "b":       [0.05, 0.1, 0.2, 0.4, 0.8, 1.6, 3.2, 6.4, 12.8, 25.6, 51.2],
     "tau_0":   [[25, 50, 100, 200, 400, 800][index_1]],
     "gamma_0": [round_sf(STRAIN_RATE/3, 4)],
-    "n":       [0.25, 0.5, 1, 2, 4, 8, 16, 32],
+    "n":       [1, 2, 4, 8, 16, 32, 64],
 }
 
 # Initialise model and top grain weights
