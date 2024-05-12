@@ -17,7 +17,6 @@ MAX_TIME     = 300 # seconds
 GRAINS_PATH  = "data/grain_p91.csv"
 MAPPING_PATH = "data/mapping_p91.csv"
 LATTICE      = 1.0
-TOP_GRAINS   = 10
 
 def get_grain_dict(history:list, indexes:list) -> dict:
     """
@@ -29,13 +28,10 @@ def get_grain_dict(history:list, indexes:list) -> dict:
     
     Returns the dictionary of euler-bunge angles (rads)
     """
-    grain_dict = {"phi_1_start": [], "phi_1_end": [], "Phi_start": [],
-                  "Phi_end": [], "phi_2_start": [], "phi_2_end": []}
+    grain_dict = {"phi_1": [], "Phi": [], "phi_2": []}
     domain = lambda x : x if x>0 else x+2*math.pi
     for i in indexes:
-        for j, key in enumerate(["phi_1_start", "Phi_start", "phi_2_start"]):
-            grain_dict[key].append(domain(history[0][i][j]))
-        for j, key in enumerate(["phi_1_end", "Phi_end", "phi_2_end"]):
+        for j, key in enumerate(grain_dict.keys()):
             grain_dict[key].append(domain(history[-1][i][j]))
     return grain_dict
 
@@ -43,15 +39,15 @@ def get_grain_dict(history:list, indexes:list) -> dict:
 index_1 = int(sys.argv[1])
 index_2 = int(sys.argv[2])
 all_params_dict = {
-    "tau_sat": [[25, 50, 100, 200, 400, 800][index_2]],
-    "b":       [0.05, 0.1, 0.2, 0.4, 0.8, 1.6, 3.2, 6.4, 12.8, 25.6, 51.2],
-    "tau_0":   [[25, 50, 100, 200, 400, 800][index_1]],
+    "tau_sat": [[50, 100, 200, 400, 800][index_2]],
+    "b":       [0.1, 0.2, 0.4, 0.8, 1.6, 3.2, 6.4, 12.8, 25.6],
+    "tau_0":   [[50, 100, 200, 400, 800][index_1]],
     "gamma_0": [round_sf(STRAIN_RATE/3, 4)],
-    "n":       [1, 2, 4, 8, 16, 32, 64],
+    "n":       [1, 2, 4, 8, 16, 32],
 }
 
 # Initialise model and top grain weights
-model = Model(GRAINS_PATH, "bcc", 1.0, num_threads=5)
+model = Model(GRAINS_PATH, "bcc", 1.0, num_threads=7)
 map_dict = csv_to_dict(MAPPING_PATH)
 sorted_indexes = list(map_dict["start"])
 sorted_indexes = [int(si)-1 for si in sorted_indexes]
@@ -92,7 +88,7 @@ for i in range(len(combinations)):
 
     # Get grain and stress information
     history = model.get_orientation_history()
-    grain_dict = get_grain_dict(history, sorted_indexes[:TOP_GRAINS])
+    grain_dict = get_grain_dict(history, sorted_indexes)
 
     # Compile results and write to CSV file
     combined_dict = {**param_dict, **data_dict, **grain_dict}
