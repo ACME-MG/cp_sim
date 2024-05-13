@@ -34,9 +34,9 @@ def get_grain_dict(pc_model:dict, history:dict, indexes:list) -> dict:
     for i in range(len(indexes)):
         
         # Initialise
-        grain_dict[f"g{i+1}_phi_1"] = []
-        grain_dict[f"g{i+1}_Phi"]   = []
-        grain_dict[f"g{i+1}_phi_2"] = []
+        grain_dict[f"g{i}_phi_1"] = []
+        grain_dict[f"g{i}_Phi"]   = []
+        grain_dict[f"g{i}_phi_2"] = []
 
         # Get the trajectory of each grain throughout history
         euler_list = [[], [], []]
@@ -48,9 +48,9 @@ def get_grain_dict(pc_model:dict, history:dict, indexes:list) -> dict:
                 euler_list[j].append(euler_value)
 
         # Store the trajectories
-        grain_dict[f"g{i+1}_phi_1"] = euler_list[0]
-        grain_dict[f"g{i+1}_Phi"]   = euler_list[1]
-        grain_dict[f"g{i+1}_phi_2"] = euler_list[2]
+        grain_dict[f"g{i}_phi_1"] = euler_list[0]
+        grain_dict[f"g{i}_Phi"]   = euler_list[1]
+        grain_dict[f"g{i}_phi_2"] = euler_list[2]
     
     # Return dictionary
     return grain_dict

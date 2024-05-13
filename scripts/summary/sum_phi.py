@@ -8,7 +8,7 @@ PARAM_NAME_LIST = ["tau_sat", "b", "tau_0", "gamma_0", "n"]
 GRAIN_INDEXES   = list(range(22))
 
 # Initialise success dictionary
-success_keys = PARAM_NAME_LIST + [f"g{i+1}_{label}" for i in GRAIN_INDEXES for label in ["phi_1", "Phi", "phi_2"]]
+success_keys = PARAM_NAME_LIST + [f"g{i}_{label}" for i in GRAIN_INDEXES for label in ["phi_1", "Phi", "phi_2"]]
 success_dict = {}
 for key in success_keys:
     success_dict[key] = []
@@ -45,7 +45,7 @@ for csv_file in csv_file_list:
         for label in ["phi_1", "Phi", "phi_2"]:
             value = data_dict[label][i]
             value = round_sf(value if value > 0 else value + 2*math.pi, 5)
-            success_dict[f"g{i+1}_{label}"].append(value)
+            success_dict[f"g{i}_{label}"].append(value)
 
 # Write results
 dict_to_csv(success_dict, f"phi_bcc.csv")
