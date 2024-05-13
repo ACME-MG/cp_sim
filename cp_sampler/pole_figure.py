@@ -234,6 +234,8 @@ class IPF:
             points = np.array(flatten([self.get_points(euler, direction) for euler in trajectory]))
             if function == "arrow": # experimental
                 axis.arrow(points[-3,0], points[-3,1], points[-1,0]-points[-3,0], points[-1,1]-points[-3,1], **settings)
+            elif function == "text":
+                axis.text(points[0,0], points[0,1], **settings)
             else:
                 plotter = getattr(axis, function)
                 plotter(points[:,0], points[:,1], **settings)

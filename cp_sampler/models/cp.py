@@ -85,26 +85,34 @@ class Model:
         self.gamma_0 = gamma_0
         self.n = n
 
-    def run_cp(self) -> None:
+    def run_cp_raw(self) -> None:
         """
-        Calibrates and runs the crystal plasticity and damage models;
-        returns the single crystal damage model, crystal plasticity damage model,
-        and the dictionary output of the NEML driver as a tuple
+        Calibrates and runs the crystal plasticity and damage models
         """
+        e_model     = self.get_elastic_model()
+        str_model   = slipharden.VoceSlipHardening(self.tau_sat, self.b, self.tau_0)
+        slip_model  = sliprules.PowerLawSlipRule(str_model, self.gamma_0, self.n)
+        i_model     = inelasticity.AsaroInelasticity(slip_model)
+        k_model     = kinematics.StandardKinematicModel(e_model, i_model)
+        sc_model    = singlecrystal.SingleCrystalModel(k_model, self.lattice, miter=16, max_divide=2, verbose=False)
+        pc_model    = polycrystal.TaylorModel(sc_model, self.orientations, nthreads=self.num_threads, weights=self.weights) # problem
+        results     = drivers.uniaxial_test(pc_model, STRAIN_RATE, emax=MAX_STRAIN, nsteps=200, rtol=1e-6, atol=1e-10, miter=25, verbose=False, full_results=True)
+        self.model_output = (sc_model, pc_model, results)
+
+    def run_cp(self, try_run:bool=True) -> None:
+        """
+        Calibrates and runs the crystal plasticity and damage models
         
-        # Get the results
-        try:
-            e_model     = self.get_elastic_model()
-            str_model   = slipharden.VoceSlipHardening(self.tau_sat, self.b, self.tau_0)
-            slip_model  = sliprules.PowerLawSlipRule(str_model, self.gamma_0, self.n)
-            i_model     = inelasticity.AsaroInelasticity(slip_model)
-            k_model     = kinematics.StandardKinematicModel(e_model, i_model)
-            sc_model    = singlecrystal.SingleCrystalModel(k_model, self.lattice, miter=16, max_divide=2, verbose=False)
-            pc_model    = polycrystal.TaylorModel(sc_model, self.orientations, nthreads=self.num_threads, weights=self.weights) # problem
-            results     = drivers.uniaxial_test(pc_model, STRAIN_RATE, emax=MAX_STRAIN, nsteps=200, rtol=1e-6, atol=1e-10, miter=25, verbose=False, full_results=True)
-            self.model_output = (sc_model, pc_model, results)
-        except:
-            self.model_output = None
+        Parameters:
+        * `try_run`: Wraps a try and except around the code
+        """
+        if try_run:
+            try:
+                self.run_cp_raw()
+            except:
+                self.model_output = None
+        else:
+            self.run_cp_raw()
 
     def get_results(self) -> tuple:
         """
@@ -113,17 +121,18 @@ class Model:
         """
         return self.model_output
     
-    def get_results_direct(self, param_dict:dict) -> None:
+    def get_results_direct(self, param_dict:dict, try_run:bool=True) -> None:
         """
         Runs the model with parameters and returns the results
 
         Parameters:
         * `param_dict`: Dictionary of parameters
+        * `try_run`:    Wraps a try and except around the code
 
         Returns the single crystal model, polycrystal model, and driver results
         """
         self.define_params(**param_dict)
-        self.run_cp()
+        self.run_cp(try_run)
         return self.get_results()
 
     def get_orientation_history(self, inverse:bool=True) -> list:

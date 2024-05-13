@@ -87,12 +87,8 @@ for key in failure_keys:
     failure_dict[key] = []
 
 # Read all CSV files and iterate through them
-results_dir = "/mnt/c/Users/Janzen/OneDrive - UNSW/PhD/results/cp_neml/20240512 (tensile bcc wide)"
+results_dir = "/mnt/c/Users/Janzen/OneDrive - UNSW/PhD/results/cp_neml/20240512 (tensile bcc)"
 csv_file_list = [file for file in os.listdir(results_dir) if file.endswith(".csv")]
-
-# # Only retrieve a subset of the CSVs (for debugging)
-# import random
-# csv_file_list = list(random.sample(csv_file_list, 100))
 
 # Iterate through CSV files
 for csv_file in csv_file_list:

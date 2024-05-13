@@ -7,12 +7,8 @@ SUMMARY_FILE = "../summary/phi_bcc.csv"
 
 data_dict = csv_to_dict(SUMMARY_FILE)
 
-input_list = ["b"]
-output_list = ["g1_phi_1_end", "g1_Phi_end", "g1_phi_2_end",
-               "g2_phi_1_end", "g2_Phi_end", "g2_phi_2_end",
-               "g3_phi_1_end", "g3_Phi_end", "g3_phi_2_end",
-               "g4_phi_1_end", "g4_Phi_end", "g4_phi_2_end",
-               "g5_phi_1_end", "g5_Phi_end", "g5_phi_2_end"]
+input_list = ["n"]
+output_list = ["g1_phi_1", "g1_Phi", "g1_phi_2"]
 
 for input in input_list:
     for output in output_list:
