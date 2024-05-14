@@ -39,12 +39,19 @@ def get_grain_dict(history:list, indexes:list) -> dict:
 index_1 = int(sys.argv[1])
 index_2 = int(sys.argv[2])
 all_params_dict = {
-    "tau_sat": [[100, 200, 400, 800][index_2]],
-    "b":       [0.5, 1, 2, 4, 8, 16],
-    "tau_0":   [[100, 200, 400, 800][index_1]],
-    "gamma_0": [round_sf(STRAIN_RATE/3, 4)],
-    "n":       list(range(1,21)),
+    "tau_sat": [100],
+    "b":       [0.5],
+    "tau_0":   [100],
+    "gamma_0": [10**i for i in [-7,-6,-5,-4,-3,-2,-1,0]],
+    "n":       [10],
 }
+# all_params_dict = {
+#     "tau_sat": [[100, 200, 400, 800][index_2]],
+#     "b":       [0.5, 1, 2, 4, 8, 16],
+#     "tau_0":   [[100, 200, 400, 800][index_1]],
+#     "gamma_0": [round_sf(STRAIN_RATE/3, 4)],
+#     "n":       list(range(1,21)),
+# }
 
 # Initialise model and top grain weights
 model = Model(GRAINS_PATH, "bcc", 1.0, num_threads=12)
@@ -55,11 +62,11 @@ sorted_indexes = [int(si)-1 for si in sorted_indexes]
 # Iterate through the parameters
 combinations = get_combinations(all_params_dict)
 param_names = list(all_params_dict.keys())
-for i in range(len(combinations)):
+for i, combination in enumerate(combinations):
 
     # Initialise
     index_str = str(i+1).zfill(3)
-    param_dict = dict(zip(param_names, combinations[i]))
+    param_dict = dict(zip(param_names, combination))
     results_path = f"results/{index_1}_{index_2}_{index_str}"
 
     # Prepare the thread for the function
@@ -81,10 +88,7 @@ for i in range(len(combinations)):
     # Get tensile curve
     strain_list = [round_sf(s[0], 5) for s in results["strain"]]
     stress_list = [round_sf(s[0], 5) for s in results["stress"]]
-    data_dict = {
-        "strain": strain_list,
-        "stress": stress_list,
-    }
+    data_dict = {"strain": strain_list, "stress": stress_list}
 
     # Get grain and stress information
     history = model.get_orientation_history()

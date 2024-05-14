@@ -14,7 +14,8 @@ for key in success_keys:
     success_dict[key] = []
 
 # Read all CSV files and iterate through them
-results_dir = "/mnt/c/Users/Janzen/OneDrive - UNSW/PhD/results/cp_neml/20240512 (tensile bcc)"
+# results_dir = "/mnt/c/Users/Janzen/OneDrive - UNSW/PhD/results/cp_neml/20240514 (tensile bcc)"
+results_dir = "../results/"
 csv_file_list = [file for file in os.listdir(results_dir) if file.endswith(".csv")]
 
 # Iterate through CSV files
@@ -48,4 +49,5 @@ for csv_file in csv_file_list:
             success_dict[f"g{i}_{label}"].append(value)
 
 # Write results
-dict_to_csv(success_dict, f"phi_bcc.csv")
+# dict_to_csv(success_dict, f"phi_bcc.csv")
+dict_to_csv(success_dict, f"bbbbb.csv")

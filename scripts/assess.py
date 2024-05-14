@@ -59,7 +59,7 @@ def get_grain_dict(pc_model:dict, history:dict, indexes:list) -> dict:
     return grain_dict
 
 # Initialises the model and plotter
-model = Model(GRAINS_PATH, "bcc", 1.0)
+model = Model(GRAINS_PATH, "bcc", 1.0, 12)
 direction = [[1,0,0], [0,1,0], [0,0,1]][1]
 ipf = IPF(model.get_lattice())
 
@@ -75,7 +75,7 @@ num_grains = len([field for field in exp_dict.keys() if "phi_1" in field])
 
 # Gets experimental history
 exp_history = [[] for _ in range(2)] # start and end
-for i in range(1,num_grains+1):
+for i in range(num_grains):
     phi_1 = exp_dict[f"g{i}_phi_1"]
     Phi   = exp_dict[f"g{i}_Phi"]
     phi_2 = exp_dict[f"g{i}_phi_2"]
@@ -85,7 +85,7 @@ for i in range(1,num_grains+1):
 # Get simulated results
 param_names = ["tau_sat", "b", "tau_0", "gamma_0", "n"]
 param_str = """
-414.33	0.07439	493.91	3.33E-05	1
+100	0.5	100	3.33E-05	32
 """
 param_list = [float(p) for p in param_str.split("\t")]
 param_dict = dict(zip(param_names, param_list))

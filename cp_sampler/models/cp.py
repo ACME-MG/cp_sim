@@ -12,9 +12,9 @@ from neml.cp import crystallography, slipharden, sliprules, inelasticity, kinema
 from neml import elasticity, drivers
 
 # Constants
-STRAIN_RATE = 1.0e-4
+STRAIN_RATE = 1.0e-4 # 1/s
 MAX_STRAIN  = 0.5
-YOUNGS      = 211000
+YOUNGS      = 190000 # 211000 # MPa
 POISSONS    = 0.30
 
 # Model class
