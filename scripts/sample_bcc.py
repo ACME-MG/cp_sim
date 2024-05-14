@@ -39,19 +39,12 @@ def get_grain_dict(history:list, indexes:list) -> dict:
 index_1 = int(sys.argv[1])
 index_2 = int(sys.argv[2])
 all_params_dict = {
-    "tau_sat": [100],
-    "b":       [0.5],
-    "tau_0":   [100],
-    "gamma_0": [10**i for i in [-7,-6,-5,-4,-3,-2,-1,0]],
-    "n":       [10],
+    "tau_sat": [[100, 200, 400, 800][index_2]],
+    "b":       [0.5, 1, 2, 4, 8, 16],
+    "tau_0":   [[100, 200, 400, 800][index_1]],
+    "gamma_0": [round_sf(STRAIN_RATE/3, 4)],
+    "n":       list(range(1,21)),
 }
-# all_params_dict = {
-#     "tau_sat": [[100, 200, 400, 800][index_2]],
-#     "b":       [0.5, 1, 2, 4, 8, 16],
-#     "tau_0":   [[100, 200, 400, 800][index_1]],
-#     "gamma_0": [round_sf(STRAIN_RATE/3, 4)],
-#     "n":       list(range(1,21)),
-# }
 
 # Initialise model and top grain weights
 model = Model(GRAINS_PATH, "bcc", 1.0, num_threads=12)
