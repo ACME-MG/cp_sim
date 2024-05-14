@@ -147,3 +147,20 @@ def flatten(list_of_lists:list) -> list:
     Returns the flattened list
     """
     return [item for sublist in list_of_lists for item in sublist]
+
+def get_thinned_list(unthinned_list:list, density:int) -> list:
+    """
+    Gets a thinned list
+
+    Parameters:
+    * `unthinned_list`: The list before thinning
+    * `density`:        The goal density of the thinned list
+
+    Returns the thinned list
+    """
+    src_data_size = len(unthinned_list)
+    step_size = src_data_size / density
+    thin_indexes = [math.floor(step_size*i) for i in range(1, density - 1)]
+    thin_indexes = [0] + thin_indexes + [src_data_size - 1]
+    thinned_list = [unthinned_list[i] for i in thin_indexes]
+    return thinned_list

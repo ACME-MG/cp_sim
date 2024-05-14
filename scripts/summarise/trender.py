@@ -3,14 +3,13 @@ import sys; sys.path += ["../.."]
 from cp_sampler.helper import csv_to_dict
 from cp_sampler.plotter import save_plot
 
-# SUMMARY_FILE = "../summary/phi_bcc.csv"
-SUMMARY_FILE = "bbbbb.csv"
+SUMMARY_FILE = "summary/phi_bcc.csv"
+GRAIN_INDEXES = list(range(20))
 
 data_dict = csv_to_dict(SUMMARY_FILE)
-
-grain_id = 0
-input_list = ["gamma_0"]
-output_list = [f"g{grain_id}_phi_1", f"g{grain_id}_Phi", f"g{grain_id}_phi_2"]
+input_list = ["n"]
+ori = lambda i : [f"g{i}_phi_1", f"g{i}_Phi", f"g{i}_phi_2"]
+output_list = [item for sublist in [ori(i) for i in GRAIN_INDEXES] for item in sublist]
 
 for input in input_list:
     for output in output_list:
@@ -20,4 +19,4 @@ for input in input_list:
         plt.ylabel(output)
         plt.gca().set_position([0.17, 0.12, 0.75, 0.75])
         plt.gca().grid(which="major", axis="both", color="SlateGray", linewidth=1, linestyle=":")
-        save_plot(f"{input}___{output}")
+        save_plot(f"trends/{input}_{output}")

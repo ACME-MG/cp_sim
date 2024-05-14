@@ -8,12 +8,13 @@
 # Libraries
 import threading
 import sys; sys.path += [".."]
-from cp_sampler.models.cp import Model, STRAIN_RATE
+from cp_sampler.models.cpd import Model
 from cp_sampler.helper import round_sf, dict_to_csv, get_combinations, csv_to_dict
 import math
 
 # Constants
-MAX_TIME     = 300 # seconds
+STRAIN_RATE  = 1e-4
+MAX_TIME     = 600 # seconds
 GRAINS_PATH  = "data/grain_p91.csv"
 MAPPING_PATH = "data/mapping_p91.csv"
 LATTICE      = 1.0
@@ -40,14 +41,34 @@ index_1 = int(sys.argv[1])
 index_2 = int(sys.argv[2])
 all_params_dict = {
     "tau_sat": [[100, 200, 400, 800][index_2]],
-    "b":       [0.5, 1, 2, 4, 8, 16],
+    "b":       [1, 2, 4, 8, 16],
     "tau_0":   [[100, 200, 400, 800][index_1]],
     "gamma_0": [round_sf(STRAIN_RATE/3, 4)],
-    "n":       list(range(1,21)),
+    "n":       [1, 2, 4, 8, 16],
+    "cd":      [1, 4, 16, 64, 256],
+    "beta":    [1, 2, 4, 8, 16],
 }
+# all_params_dict = {
+#     "tau_sat": [[100, 200, 400, 800][index_2]],
+#     "b":       [0.5, 1, 2, 4, 8, 16],
+#     "tau_0":   [[100, 200, 400, 800][index_1]],
+#     "gamma_0": [round_sf(STRAIN_RATE/3, 4)],
+#     "n":       list(range(1,21)),
+# }
 
-# Initialise model and top grain weights
-model = Model(GRAINS_PATH, "bcc", 1.0, num_threads=12)
+# Initialise model
+model = Model(
+    grains_path = GRAINS_PATH,
+    structure   = "bcc",
+    lattice_a   = 1.0,
+    num_threads = 12,
+    strain_rate = STRAIN_RATE,
+    max_strain  = 0.30,
+    youngs      = 190000,
+    poissons    = 0.28,
+)
+
+# Initialise specific grains
 map_dict = csv_to_dict(MAPPING_PATH)
 sorted_indexes = list(map_dict["start"])
 sorted_indexes = [int(si)-1 for si in sorted_indexes]

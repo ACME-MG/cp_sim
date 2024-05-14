@@ -11,16 +11,11 @@ from neml.math import rotations
 from neml.cp import crystallography, slipharden, sliprules, inelasticity, kinematics, singlecrystal, polycrystal
 from neml import elasticity, drivers
 
-# Constants
-STRAIN_RATE = 1.0e-4 # 1/s
-MAX_STRAIN  = 0.3
-YOUNGS      = 190000 # 211000 # MPa
-POISSONS    = 0.28
-
 # Model class
 class Model:
 
-    def __init__(self, grains_path:str, structure:str="fcc", lattice_a:int=1.0, num_threads:int=5):
+    def __init__(self, grains_path:str, structure:str="fcc", lattice_a:int=1.0, num_threads:int=5,
+                 strain_rate:float=1.0e-4, max_strain:float=0.3, youngs:float=190000, poissons:float=0.28):
         """
         Constructor for the Model class
 
@@ -29,6 +24,10 @@ class Model:
         * `structure`:   Crystal structure ("bcc" or "fcc")
         * `lattice_a`:   The lattice parameter (a)
         * `num_threads`: Number of threads to use to run the model
+        * `strain_rate`: The strain rate
+        * `max_strain`:  The maximum strain to run the driver to
+        * `youngs`:      The elastic modulus
+        * `poissons`:    The poissons ratio
         """
 
         # Create grain information
@@ -45,8 +44,12 @@ class Model:
             self.lattice.add_slip_system([1,1,1], [1,2,3])
             self.lattice.add_slip_system([1,1,1], [1,1,2])
 
-        # Initialise others
-        self.num_threads = num_threads
+        # Initialise other parameters
+        self.num_threads  = num_threads
+        self.strain_rate  = strain_rate
+        self.max_strain   = max_strain
+        self.youngs       = youngs
+        self.poissons     = poissons
         self.model_output = None
 
     def get_lattice(self) -> crystallography.CubicLattice:
@@ -65,7 +68,7 @@ class Model:
         """
         Returns the elastic model
         """
-        e_model = elasticity.IsotropicLinearElasticModel(YOUNGS, "youngs", POISSONS, "poissons")
+        e_model = elasticity.IsotropicLinearElasticModel(self.youngs, "youngs", self.poissons, "poissons")
         return e_model
 
     def define_params(self, tau_sat:float, b:float, tau_0:float, gamma_0:float, n:float) -> None:
@@ -87,7 +90,7 @@ class Model:
 
     def run_cp_raw(self) -> None:
         """
-        Calibrates and runs the crystal plasticity and damage models
+        Calibrates and runs the crystal plasticity model
         """
         e_model     = self.get_elastic_model()
         str_model   = slipharden.VoceSlipHardening(self.tau_sat, self.b, self.tau_0)
@@ -96,12 +99,12 @@ class Model:
         k_model     = kinematics.StandardKinematicModel(e_model, i_model)
         sc_model    = singlecrystal.SingleCrystalModel(k_model, self.lattice, miter=16, max_divide=2, verbose=False)
         pc_model    = polycrystal.TaylorModel(sc_model, self.orientations, nthreads=self.num_threads, weights=self.weights) # problem
-        results     = drivers.uniaxial_test(pc_model, STRAIN_RATE, emax=MAX_STRAIN, nsteps=200, rtol=1e-6, atol=1e-10, miter=25, verbose=False, full_results=True)
+        results     = drivers.uniaxial_test(pc_model, self.strain_rate, emax=self.max_strain, nsteps=200, rtol=1e-6, atol=1e-10, miter=25, verbose=False, full_results=True)
         self.model_output = (sc_model, pc_model, results)
 
     def run_cp(self, try_run:bool=True) -> None:
         """
-        Calibrates and runs the crystal plasticity and damage models
+        Calibrates and runs the crystal plasticity model
         
         Parameters:
         * `try_run`: Wraps a try and except around the code
