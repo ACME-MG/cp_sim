@@ -13,9 +13,9 @@ from neml import elasticity, drivers
 
 # Constants
 STRAIN_RATE = 1.0e-4 # 1/s
-MAX_STRAIN  = 0.5
+MAX_STRAIN  = 0.3
 YOUNGS      = 190000 # 211000 # MPa
-POISSONS    = 0.30
+POISSONS    = 0.28
 
 # Model class
 class Model:
