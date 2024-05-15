@@ -13,8 +13,8 @@ from cp_sampler.helper import round_sf, dict_to_csv, get_combinations, csv_to_di
 import math
 
 # Constants
-STRAIN_RATE  = 1e-4
 MAX_TIME     = 300 # seconds
+EXP_PATH     = "data/tensile_p91.csv"
 GRAINS_PATH  = "data/grain_p91.csv"
 MAPPING_PATH = "data/mapping_p91.csv"
 LATTICE      = 1.0
@@ -36,14 +36,19 @@ def get_grain_dict(history:list, indexes:list) -> dict:
             grain_dict[key].append(domain(history[-1][i][j]))
     return grain_dict
 
+# Gets the experimental data
+exp_dict = csv_to_dict(EXP_PATH)
+num_grains = len([field for field in exp_dict.keys() if "phi_1" in field])
+strain_rate = round_sf(max(exp_dict["strain"])/max(exp_dict["time"]), 5)
+
 # Define parameter domains
 index_1 = int(sys.argv[1])
 index_2 = int(sys.argv[2])
 all_params_dict = {
-    "tau_sat": [[100, 200, 400, 800][index_2]],
+    "tau_sat": [[100, 200, 400, 800][index_1]],
     "b":       [0.5, 1, 2, 4, 8, 16],
-    "tau_0":   [[100, 200, 400, 800][index_1]],
-    "gamma_0": [round_sf(STRAIN_RATE/3, 4)],
+    "tau_0":   [[100, 200, 400, 800][index_2]],
+    "gamma_0": [round_sf(strain_rate/3, 4)],
     "n":       [1, 2, 4, 8, 16, 32],
 }
 
@@ -53,7 +58,7 @@ model = Model(
     structure   = "bcc",
     lattice_a   = 1.0,
     num_threads = 12,
-    strain_rate = STRAIN_RATE,
+    strain_rate = strain_rate,
     max_strain  = 0.30,
     youngs      = 190000,
     poissons    = 0.28,

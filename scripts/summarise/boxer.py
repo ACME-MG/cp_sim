@@ -1,5 +1,4 @@
 # Libraries
-import numpy as np
 import matplotlib.pyplot as plt
 import sys; sys.path += ["../.."]
 from cp_sampler.helper import csv_to_dict

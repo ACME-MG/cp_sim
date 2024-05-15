@@ -106,7 +106,7 @@ class Model:
         dm_k_model = kinematics.DamagedStandardKinematicModel(e_model, i_model, dm_planar)
         sc_model   = singlecrystal.SingleCrystalModel(dm_k_model, self.lattice, miter=16, max_divide=2, verbose=False)
         pc_model   = polycrystal.TaylorModel(sc_model, self.orientations, nthreads=self.num_threads, weights=self.weights)
-        results    = drivers.uniaxial_test(pc_model, self.strain_rate, emax=self.max_strain, nsteps=100, rtol=1e-6, atol=1e-10, miter=25, verbose=False, full_results=True)
+        results    = drivers.uniaxial_test(pc_model, self.strain_rate, emax=self.max_strain, nsteps=200, rtol=1e-6, atol=1e-10, miter=25, verbose=False, full_results=True)
         self.model_output = (sc_model, pc_model, results)
 
     def run_cp(self, try_run:bool=True) -> None:

@@ -41,8 +41,8 @@ class Model:
             self.lattice.add_slip_system([1,1,0], [1,1,1])
         elif structure == "bcc":
             self.lattice.add_slip_system([1,1,1], [1,1,0])
-            # self.lattice.add_slip_system([1,1,1], [1,2,3])
-            # self.lattice.add_slip_system([1,1,1], [1,1,2])
+            self.lattice.add_slip_system([1,1,1], [1,2,3])
+            self.lattice.add_slip_system([1,1,1], [1,1,2])
 
         # Initialise other parameters
         self.num_threads  = num_threads
@@ -63,13 +63,6 @@ class Model:
         Returns the weights
         """
         return self.weights
-
-    def get_elastic_model(self):
-        """
-        Returns the elastic model
-        """
-        e_model = elasticity.IsotropicLinearElasticModel(self.youngs, "youngs", self.poissons, "poissons")
-        return e_model
 
     def define_params(self, tau_sat:float, b:float, tau_0:float, gamma_0:float, n:float) -> None:
         """
@@ -92,14 +85,15 @@ class Model:
         """
         Calibrates and runs the crystal plasticity model
         """
-        e_model     = self.get_elastic_model()
-        str_model   = slipharden.VoceSlipHardening(self.tau_sat, self.b, self.tau_0)
-        slip_model  = sliprules.PowerLawSlipRule(str_model, self.gamma_0, self.n)
-        i_model     = inelasticity.AsaroInelasticity(slip_model)
-        k_model     = kinematics.StandardKinematicModel(e_model, i_model)
-        sc_model    = singlecrystal.SingleCrystalModel(k_model, self.lattice, miter=16, max_divide=2, verbose=False)
-        pc_model    = polycrystal.TaylorModel(sc_model, self.orientations, nthreads=self.num_threads, weights=self.weights) # problem
-        results     = drivers.uniaxial_test(pc_model, self.strain_rate, emax=self.max_strain, nsteps=200, rtol=1e-6, atol=1e-10, miter=25, verbose=False, full_results=True)
+        e_model    = elasticity.IsotropicLinearElasticModel(self.youngs, "youngs", self.poissons, "poissons")
+        str_model  = slipharden.VoceSlipHardening(self.tau_sat, self.b, self.tau_0)
+        slip_model = sliprules.PowerLawSlipRule(str_model, self.gamma_0, self.n)
+        i_model    = inelasticity.AsaroInelasticity(slip_model)
+        k_model    = kinematics.StandardKinematicModel(e_model, i_model)
+        sc_model   = singlecrystal.SingleCrystalModel(k_model, self.lattice, miter=16, max_divide=2, verbose=False)
+        pc_model   = polycrystal.TaylorModel(sc_model, self.orientations, nthreads=self.num_threads, weights=self.weights) # problem
+        results    = drivers.uniaxial_test(pc_model, self.strain_rate, emax=self.max_strain, nsteps=500, rtol=1e-6,
+                                           atol=1e-10, miter=25, verbose=False, full_results=True)
         self.model_output = (sc_model, pc_model, results)
 
     def run_cp(self, try_run:bool=True) -> None:

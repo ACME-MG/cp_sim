@@ -87,7 +87,7 @@ for key in failure_keys:
     failure_dict[key] = []
 
 # Read all CSV files and iterate through them
-results_dir = "/mnt/c/Users/Janzen/OneDrive - UNSW/PhD/results/cp_neml/20240514 (tensile bcc)"
+results_dir = "/mnt/c/Users/Janzen/OneDrive - UNSW/PhD/results/cp_neml/20240515 (cp_bcc 1ss)"
 csv_file_list = [file for file in os.listdir(results_dir) if file.endswith(".csv")]
 
 # Iterate through CSV files

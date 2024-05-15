@@ -15,9 +15,10 @@ from cp_sampler.plotter import Plotter, save_plot, define_legend
 
 # Constants
 MAX_TIME      = 300 # seconds
+EXP_PATH      = "data/tensile_p91.csv"
 GRAINS_PATH   = "data/grain_p91.csv"
 MAPPING_PATH  = "data/mapping_p91.csv"
-CALIB_INDEXES = [0] # starts at 0
+CALIB_INDEXES = [0,1,2] # starts at 0
 VALID_INDEXES = []  # starts at 0
 
 def get_grain_dict(pc_model:dict, history:dict, indexes:list) -> dict:
@@ -58,13 +59,18 @@ def get_grain_dict(pc_model:dict, history:dict, indexes:list) -> dict:
     # Return dictionary
     return grain_dict
 
+# Gets the experimental data
+exp_dict = csv_to_dict(EXP_PATH)
+num_grains = len([field for field in exp_dict.keys() if "phi_1" in field])
+strain_rate = round_sf(max(exp_dict["strain"])/max(exp_dict["time"]), 5)
+
 # Initialises model
 model = Model(
     grains_path = GRAINS_PATH,
     structure   = "bcc",
     lattice_a   = 1.0,
     num_threads = 12,
-    strain_rate = 1.0e-4,
+    strain_rate = strain_rate,
     max_strain  = 0.30,
     youngs      = 190000,
     poissons    = 0.28,
@@ -79,11 +85,6 @@ map_dict = csv_to_dict(MAPPING_PATH)
 start_indexes = [int(si)-1 for si in list(map_dict["start"])]
 end_indexes = [int(ei)-1 for ei in list(map_dict["end"])]
 
-# Gets the experimental data
-exp_path = "data/tensile_p91.csv"
-exp_dict = csv_to_dict(exp_path)
-num_grains = len([field for field in exp_dict.keys() if "phi_1" in field])
-
 # Gets experimental history
 exp_history = [[] for _ in range(2)] # start and end
 for i in range(num_grains):
@@ -96,7 +97,7 @@ for i in range(num_grains):
 # Get simulated results
 param_names = ["tau_sat", "b", "tau_0", "gamma_0", "n"]
 param_str = """
-400	0.5	400	3.33E-05	16
+202.56	5	200.94	3.33E-05	8
 """
 param_list = [float(p) for p in param_str.split("\t")]
 param_dict = dict(zip(param_names, param_list))
@@ -106,8 +107,10 @@ sim_history = model.get_orientation_history()
 # Plot the tensile curves
 plotter = Plotter(x_label="strain", y_label="stress")
 plotter.scat_plot(exp_dict)
-data_dict = {"strain": [round_sf(s[0], 5) for s in sim_results["strain"]], "stress": [round_sf(s[0], 5) for s in sim_results["stress"]]}
-plotter.line_plot(data_dict)
+plotter.line_plot({
+    "strain": [round_sf(s[0], 5) for s in sim_results["strain"]],
+    "stress": [round_sf(s[0], 5) for s in sim_results["stress"]]
+})
 define_legend(["darkgray", "green"], ["Experimental", "Calibration"], [7, 1.5], ["scatter", "line"])
 save_plot("plot_ss.png")
 
@@ -127,7 +130,7 @@ ipf.plot_ipf_trajectory(sim_trajectories, direction, "plot", {"color": "green", 
 ipf.plot_ipf_trajectory(sim_trajectories, direction, "arrow", {"color": "green", "head_width": 0.0075, "head_length": 0.0075*1.5})
 ipf.plot_ipf_trajectory([[st[0]] for st in sim_trajectories], direction, "scatter", {"color": "green", "s": 6**2})
 
-# Plot the validaiton reorientation trajectories
+# Plot the validation reorientation trajectories
 sim_trajectories = get_trajectories(sim_history, [start_indexes[i] for i in VALID_INDEXES])
 ipf.plot_ipf_trajectory(sim_trajectories, direction, "plot", {"color": "red", "linewidth": 1})
 ipf.plot_ipf_trajectory(sim_trajectories, direction, "arrow", {"color": "red", "head_width": 0.0075, "head_length": 0.0075*1.5})
