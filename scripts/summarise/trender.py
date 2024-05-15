@@ -3,11 +3,12 @@ import sys; sys.path += ["../.."]
 from cp_sampler.helper import csv_to_dict
 from cp_sampler.plotter import save_plot
 
-SUMMARY_FILE = "summary/phi_bcc.csv"
-GRAIN_INDEXES = list(range(20))
+# SUMMARY_FILE = "summary/phi_bcc.csv"
+SUMMARY_FILE = "summary/aaaaa.csv"
+GRAIN_INDEXES = [0]
 
 data_dict = csv_to_dict(SUMMARY_FILE)
-input_list = ["n"]
+input_list = ["n", "beta"]
 ori = lambda i : [f"g{i}_phi_1", f"g{i}_Phi", f"g{i}_phi_2"]
 output_list = [item for sublist in [ori(i) for i in GRAIN_INDEXES] for item in sublist]
 

@@ -8,13 +8,13 @@
 # Libraries
 import threading
 import sys; sys.path += [".."]
-from cp_sampler.models.cpd import Model
+from cp_sampler.models.cp import Model
 from cp_sampler.helper import round_sf, dict_to_csv, get_combinations, csv_to_dict
 import math
 
 # Constants
 STRAIN_RATE  = 1e-4
-MAX_TIME     = 600 # seconds
+MAX_TIME     = 300 # seconds
 GRAINS_PATH  = "data/grain_p91.csv"
 MAPPING_PATH = "data/mapping_p91.csv"
 LATTICE      = 1.0
@@ -41,20 +41,11 @@ index_1 = int(sys.argv[1])
 index_2 = int(sys.argv[2])
 all_params_dict = {
     "tau_sat": [[100, 200, 400, 800][index_2]],
-    "b":       [1, 2, 4, 8, 16],
+    "b":       [0.5, 1, 2, 4, 8, 16],
     "tau_0":   [[100, 200, 400, 800][index_1]],
     "gamma_0": [round_sf(STRAIN_RATE/3, 4)],
-    "n":       [1, 2, 4, 8, 16],
-    "cd":      [10, 20, 40, 80, 160, 320, 640],
-    "beta":    [1, 2, 4, 8, 16, 32],
+    "n":       [1, 2, 4, 8, 16, 32],
 }
-# all_params_dict = {
-#     "tau_sat": [[100, 200, 400, 800][index_2]],
-#     "b":       [0.5, 1, 2, 4, 8, 16],
-#     "tau_0":   [[100, 200, 400, 800][index_1]],
-#     "gamma_0": [round_sf(STRAIN_RATE/3, 4)],
-#     "n":       list(range(1,21)),
-# }
 
 # Initialise model
 model = Model(

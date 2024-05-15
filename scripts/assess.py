@@ -8,7 +8,7 @@
 # Libraries
 import numpy as np
 import sys; sys.path += [".."]
-from cp_sampler.models.cpd import Model
+from cp_sampler.models.cp import Model
 from cp_sampler.helper import round_sf, csv_to_dict
 from cp_sampler.pole_figure import IPF, get_trajectories
 from cp_sampler.plotter import Plotter, save_plot, define_legend
@@ -94,9 +94,9 @@ for i in range(num_grains):
     exp_history[1].append([phi_1[-1], Phi[-1], phi_2[-1]])
 
 # Get simulated results
-param_names = ["tau_sat", "b", "tau_0", "gamma_0", "n", "cd", "beta"]
+param_names = ["tau_sat", "b", "tau_0", "gamma_0", "n"]
 param_str = """
-100	0.5	100	3.33E-05	32	530	18.0
+400	0.5	400	3.33E-05	16
 """
 param_list = [float(p) for p in param_str.split("\t")]
 param_dict = dict(zip(param_names, param_list))

@@ -41,8 +41,8 @@ class Model:
             self.lattice.add_slip_system([1,1,0], [1,1,1])
         elif structure == "bcc":
             self.lattice.add_slip_system([1,1,1], [1,1,0])
-            self.lattice.add_slip_system([1,1,1], [1,2,3])
-            self.lattice.add_slip_system([1,1,1], [1,1,2])
+            # self.lattice.add_slip_system([1,1,1], [1,2,3])
+            # self.lattice.add_slip_system([1,1,1], [1,1,2])
 
         # Initialise other parameters
         self.num_threads  = num_threads

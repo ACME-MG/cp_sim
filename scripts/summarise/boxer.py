@@ -49,7 +49,7 @@ grain_indexes = [5,6,7,8,9]
 ori = lambda i : [f"g{i}_phi_1", f"g{i}_Phi", f"g{i}_phi_2"]
 field_list = [item for sublist in [ori(i) for i in grain_indexes] for item in sublist]
 sim_grid = [sim_dict[field] for field in field_list]
-exp_grid = [[exp_dict[field][i] for i in [0,-1]] for field in field_list]
+exp_grid = [[exp_dict[field][i] for i in [-1]] for field in field_list]
 
 # Plot boxplots
 plot_boxplots(sim_grid, exp_grid, field_list)

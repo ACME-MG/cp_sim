@@ -5,6 +5,7 @@ from cp_sampler.helper import csv_to_dict, dict_to_csv, round_sf
 
 # Constants
 PARAM_NAME_LIST = ["tau_sat", "b", "tau_0", "gamma_0", "n"]
+# PARAM_NAME_LIST = ["tau_sat", "b", "tau_0", "gamma_0", "n", "cd", "beta"]
 GRAIN_INDEXES   = list(range(22))
 
 # Initialise success dictionary
@@ -49,3 +50,4 @@ for csv_file in csv_file_list:
 
 # Write results
 dict_to_csv(success_dict, f"summary/phi_bcc.csv")
+# dict_to_csv(success_dict, f"summary/aaaaa.csv")
