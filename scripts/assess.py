@@ -15,11 +15,12 @@ from cp_sampler.plotter import Plotter, save_plot, define_legend
 
 # Constants
 MAX_TIME      = 300 # seconds
-EXP_PATH      = "data/tensile_p91.csv"
-GRAINS_PATH   = "data/grain_p91.csv"
-MAPPING_PATH  = "data/mapping_p91.csv"
-CALIB_INDEXES = [0,1,2] # starts at 0
-VALID_INDEXES = []  # starts at 0
+SAMPLE_INDEX  = 0
+EXP_PATH      = f"data/tensile_p91_{SAMPLE_INDEX}.csv"
+GRAINS_PATH   = f"data/grain_p91_{SAMPLE_INDEX}.csv"
+MAPPING_PATH  = f"data/mapping_p91_{SAMPLE_INDEX}.csv"
+CALIB_INDEXES = [0,1,2]
+VALID_INDEXES = []
 
 def get_grain_dict(pc_model:dict, history:dict, indexes:list) -> dict:
     """
@@ -126,15 +127,15 @@ for i, et in enumerate(exp_trajectories):
 
 # Plot the calibration reorientation trajectories
 sim_trajectories = get_trajectories(sim_history, [start_indexes[i] for i in CALIB_INDEXES])
-ipf.plot_ipf_trajectory(sim_trajectories, direction, "plot", {"color": "green", "linewidth": 1})
-ipf.plot_ipf_trajectory(sim_trajectories, direction, "arrow", {"color": "green", "head_width": 0.0075, "head_length": 0.0075*1.5})
-ipf.plot_ipf_trajectory([[st[0]] for st in sim_trajectories], direction, "scatter", {"color": "green", "s": 6**2})
+ipf.plot_ipf_trajectory(sim_trajectories, direction, "plot", {"color": "green", "linewidth": 1, "zorder": 3})
+ipf.plot_ipf_trajectory(sim_trajectories, direction, "arrow", {"color": "green", "head_width": 0.0075, "head_length": 0.0075*1.5, "zorder": 3})
+ipf.plot_ipf_trajectory([[st[0]] for st in sim_trajectories], direction, "scatter", {"color": "green", "s": 6**2, "zorder": 3})
 
 # Plot the validation reorientation trajectories
 sim_trajectories = get_trajectories(sim_history, [start_indexes[i] for i in VALID_INDEXES])
-ipf.plot_ipf_trajectory(sim_trajectories, direction, "plot", {"color": "red", "linewidth": 1})
-ipf.plot_ipf_trajectory(sim_trajectories, direction, "arrow", {"color": "red", "head_width": 0.0075, "head_length": 0.0075*1.5})
-ipf.plot_ipf_trajectory([[st[0]] for st in sim_trajectories], direction, "scatter", {"color": "red", "s": 6**2})
+ipf.plot_ipf_trajectory(sim_trajectories, direction, "plot", {"color": "red", "linewidth": 1, "zorder": 3})
+ipf.plot_ipf_trajectory(sim_trajectories, direction, "arrow", {"color": "red", "head_width": 0.0075, "head_length": 0.0075*1.5, "zorder": 3})
+ipf.plot_ipf_trajectory([[st[0]] for st in sim_trajectories], direction, "scatter", {"color": "red", "s": 6**2, "zorder": 3})
 
 # Format and save
 define_legend(["darkgray", "green", "red"], ["Experimental", "Calibration", "Validation"], [7, 1.5, 1.5], ["scatter", "line", "line"])

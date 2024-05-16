@@ -13,11 +13,12 @@ from cp_sampler.helper import round_sf, dict_to_csv, get_combinations, csv_to_di
 import math
 
 # Constants
-MAX_TIME     = 300 # seconds
-EXP_PATH     = "data/tensile_p91.csv"
-GRAINS_PATH  = "data/grain_p91.csv"
-MAPPING_PATH = "data/mapping_p91.csv"
-LATTICE      = 1.0
+MAX_TIME      = 300 # seconds
+SAMPLE_INDEX  = 0
+EXP_PATH      = f"data/tensile_p91_{SAMPLE_INDEX}.csv"
+GRAINS_PATH   = f"data/grain_p91_{SAMPLE_INDEX}.csv"
+MAPPING_PATH  = f"data/mapping_p91_{SAMPLE_INDEX}.csv"
+LATTICE       = 1.0
 
 def get_grain_dict(history:list, indexes:list) -> dict:
     """

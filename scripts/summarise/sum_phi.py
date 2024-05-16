@@ -5,6 +5,7 @@ from cp_sampler.helper import csv_to_dict, dict_to_csv, round_sf
 
 # Constants
 PARAM_NAME_LIST = ["tau_sat", "b", "tau_0", "gamma_0", "n"]
+# PARAM_NAME_LIST = ["tau_sat", "b", "tau_0", "gamma_0", "n", "cd", "beta"]
 GRAIN_INDEXES   = list(range(54))
 
 # Initialise success dictionary
@@ -14,7 +15,8 @@ for key in success_keys:
     success_dict[key] = []
 
 # Read all CSV files and iterate through them
-results_dir = "/mnt/c/Users/Janzen/OneDrive - UNSW/PhD/results/cp_neml/20240515 (cp_bcc 1ss)"
+results_dir = "/mnt/c/Users/Janzen/OneDrive - UNSW/PhD/results/cp_neml/20240515 (cp_bcc)"
+# results_dir = "/mnt/c/Users/Janzen/OneDrive - UNSW/PhD/results/cp_neml/20240515 (cpd_bcc partial)"
 csv_file_list = [file for file in os.listdir(results_dir) if file.endswith(".csv")]
 
 # Iterate through CSV files
