@@ -8,10 +8,10 @@
 # Libraries
 import numpy as np
 import sys; sys.path += [".."]
-from cp_sampler.models.cp import Model
-from cp_sampler.helper import round_sf, csv_to_dict
-from cp_sampler.pole_figure import IPF, get_trajectories
-from cp_sampler.plotter import Plotter, save_plot, define_legend
+from cp_sim.models.cp import Model
+from cp_sim.helper import round_sf, csv_to_dict
+from cp_sim.pole_figure import IPF, get_trajectories
+from cp_sim.plotter import Plotter, save_plot, define_legend
 
 # Constants
 MAX_TIME      = 300 # seconds

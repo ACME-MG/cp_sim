@@ -1,7 +1,7 @@
 # Libraries
 import os, math
 import sys; sys.path += ["../.."]
-from cp_sampler.helper import csv_to_dict, dict_to_csv, round_sf
+from cp_sim.helper import csv_to_dict, dict_to_csv, round_sf
 
 # Constants
 PARAM_NAME_LIST = ["tau_sat", "b", "tau_0", "gamma_0", "n"]

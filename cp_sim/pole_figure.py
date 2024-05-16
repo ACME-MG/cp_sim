@@ -11,7 +11,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from neml.math import rotations, tensors
 from neml.cp import crystallography
-from cp_sampler.helper import flatten
+from cp_sim.helper import flatten
 
 # Pole figure class
 class PF:

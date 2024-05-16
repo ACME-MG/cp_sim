@@ -3,7 +3,7 @@ import numpy as np, os, math
 import matplotlib.pyplot as plt
 from scipy.interpolate import splev, splrep
 import sys; sys.path += ["../.."]
-from cp_sampler.helper import csv_to_dict, dict_to_csv, round_sf
+from cp_sim.helper import csv_to_dict, dict_to_csv, round_sf
 
 # Constants
 X_HEADER        = "strain"

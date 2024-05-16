@@ -8,8 +8,8 @@
 # Libraries
 import threading
 import sys; sys.path += [".."]
-from cp_sampler.models.cp import Model
-from cp_sampler.helper import round_sf, dict_to_csv, get_combinations, csv_to_dict
+from cp_sim.models.cp import Model
+from cp_sim.helper import round_sf, dict_to_csv, get_combinations, csv_to_dict
 import math
 
 # Constants

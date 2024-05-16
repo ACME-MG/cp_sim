@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import sys; sys.path += ["../.."]
-from cp_sampler.helper import csv_to_dict
-from cp_sampler.plotter import save_plot
+from cp_sim.helper import csv_to_dict
+from cp_sim.plotter import save_plot
 
 SUMMARY_FILE = "summary/phi_bcc.csv"
 GRAIN_INDEXES = [0]

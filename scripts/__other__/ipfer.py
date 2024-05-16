@@ -1,10 +1,10 @@
 # Libraries
 import sys; sys.path += ["../.."]
-from cp_sampler.models.cp import Model
-from cp_sampler.helper import csv_to_dict
-from cp_sampler.pole_figure import IPF, get_trajectories
-from cp_sampler.helper import csv_to_dict
-from cp_sampler.plotter import save_plot, define_legend
+from cp_sim.models.cp import Model
+from cp_sim.helper import csv_to_dict
+from cp_sim.pole_figure import IPF, get_trajectories
+from cp_sim.helper import csv_to_dict
+from cp_sim.plotter import save_plot, define_legend
 
 # Constants
 GRAIN_INDEXES = [0, 1, 2]
