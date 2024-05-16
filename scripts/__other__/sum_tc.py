@@ -134,13 +134,13 @@ for csv_file in csv_file_list:
         success_dict[f"y_{i+1}"].append(round_sf(y_list[i], 5))
 
 # Write results
-dict_to_csv(failure_dict, "summary/failures.csv")
-dict_to_csv(success_dict, "summary/tc_bcc.csv")
+dict_to_csv(failure_dict, "results/failures.csv")
+dict_to_csv(success_dict, "results/tc_bcc.csv")
 
 # Format and save plot for fits
 plt.xlim(0.0, 0.5)
 plt.ylim(0.0, None)
 plt.xlabel("Strain (mm/mm)")
 plt.ylabel("Stress (MPa)")
-plt.savefig("summary/tc_plot.png")
+plt.savefig("results/tc_plot.png")
 plt.clf()

@@ -50,5 +50,5 @@ for csv_file in csv_file_list:
             success_dict[f"g{i}_{label}"].append(value)
 
 # Write results
-dict_to_csv(success_dict, f"summary/phi_bcc.csv")
-# dict_to_csv(success_dict, f"summary/aaaaa.csv")
+dict_to_csv(success_dict, f"results/phi_bcc.csv")
+# dict_to_csv(success_dict, f"results/aaaaa.csv")

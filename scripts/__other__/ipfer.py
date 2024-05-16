@@ -8,7 +8,7 @@ from cp_sim.plotter import save_plot, define_legend
 
 # Constants
 GRAIN_INDEXES = [0, 1, 2]
-SIM_PATH      = "summary/phi_bcc.csv"
+SIM_PATH      = "results/phi_bcc.csv"
 EXP_PATH      = "../data/tensile_p91.csv"
 GRAINS_PATH   = "../data/grain_p91.csv"
 MAPPING_PATH  = "../data/mapping_p91.csv"

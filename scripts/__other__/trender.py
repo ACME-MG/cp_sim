@@ -3,7 +3,7 @@ import sys; sys.path += ["../.."]
 from cp_sim.helper import csv_to_dict
 from cp_sim.plotter import save_plot
 
-SUMMARY_FILE = "summary/phi_bcc.csv"
+SUMMARY_FILE = "results/phi_bcc.csv"
 GRAIN_INDEXES = [0]
 
 data_dict = csv_to_dict(SUMMARY_FILE)

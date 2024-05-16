@@ -5,7 +5,7 @@ from cp_sim.helper import csv_to_dict
 from cp_sim.plotter import save_plot
 
 # Constants
-SIM_FILE = "summary/phi_bcc.csv"
+SIM_FILE = "results/phi_bcc.csv"
 EXP_FILE = "../data/tensile_p91.csv"
 
 def plot_boxplots(point_grid:list, ideal_grid:list, field_list:list) -> None:
