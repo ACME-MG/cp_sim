@@ -10,7 +10,7 @@ import threading
 import sys; sys.path += [".."]
 from cp_sim.models.cp import Model
 from cp_sim.pole_figure import get_trajectories
-from cp_sim.helper import round_sf, dict_to_csv, get_combinations, csv_to_dict
+from cp_sim.helper import round_sf, dict_to_csv, get_combinations, csv_to_dict, get_thinned_list
 import math
 
 # Paths
@@ -23,6 +23,7 @@ MAX_TIME    = 300 # seconds
 MAX_STRAIN  = 0.2
 STRAIN_RATE = 1e-4
 LATTICE     = 1.0
+THIN_AMOUNT = 100
 
 def quick_spline(x_list:list, y_list:list, x_value:float) -> float:
     """
@@ -152,8 +153,8 @@ for i, combination in enumerate(combinations):
     sc_model, pc_model, results = model_output
 
     # Get tensile curve
-    strain_list = [round_sf(s[0], 5) for s in results["strain"]]
-    stress_list = [round_sf(s[0], 5) for s in results["stress"]]
+    strain_list = get_thinned_list([round_sf(s[0], 5) for s in results["strain"]], THIN_AMOUNT)
+    stress_list = get_thinned_list([round_sf(s[0], 5) for s in results["stress"]], THIN_AMOUNT)
     data_dict = {"strain": strain_list, "stress": stress_list}
 
     # Get grain and stress information
