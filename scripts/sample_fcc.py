@@ -62,7 +62,7 @@ def get_grain_dict(strain_list:list, history:list, grain_ids:list) -> dict:
 
     # Initialise grain dictionary (20%, 40$, .., 100% of max strain)
     strain_intervals = ["0p2", "0p4", "0p6", "0p8", "1p0"]
-    grain_dict = {}
+    grain_dict = {"grain_id": grain_ids}
     for strain_interval in strain_intervals:
         for euler_value in ["phi_1", "Phi", "phi_2"]:
             grain_dict[f"{strain_interval}_{euler_value}"] = []
