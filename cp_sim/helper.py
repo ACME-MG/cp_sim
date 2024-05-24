@@ -31,8 +31,12 @@ def dict_to_csv(data_dict:dict, csv_path:str) -> None:
     * `csv_path`: The path that the CSV file will be written to
     """
     
-    # Extract headers and turn all values into lists
+    # Extract and check headers
     headers = data_dict.keys()
+    if len(headers) == 0:
+        return
+
+    # Turn all values into lists
     for header in headers:
         if not isinstance(data_dict[header], list):
             data_dict[header] = [data_dict[header]]

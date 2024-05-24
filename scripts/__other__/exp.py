@@ -7,81 +7,35 @@
 
 # Libraries
 import numpy as np
+from neml.cp import crystallography
 import sys; sys.path += [".."]
-from cp_sim.models.cp import Model
 from cp_sim.helper import round_sf, csv_to_dict
 from cp_sim.pole_figure import IPF, get_trajectories
 from cp_sim.plotter import Plotter, save_plot, define_legend
 
 # Constants
-MAX_TIME      = 300 # seconds
-SAMPLE_INDEX  = 0
-EXP_PATH      = f"data/tensile_p91_{SAMPLE_INDEX}.csv"
-GRAINS_PATH   = f"data/grain_p91_{SAMPLE_INDEX}.csv"
-MAPPING_PATH  = f"data/mapping_p91_{SAMPLE_INDEX}.csv"
-CALIB_INDEXES = [0,1,2]
-VALID_INDEXES = []
-
-def get_grain_dict(pc_model:dict, history:dict, indexes:list) -> dict:
-    """
-    Creates a dictionary of grain information
-
-    Parameters:
-    * `pc_model`: The polycrystal model
-    * `history`:  The history of the model simulation
-    * `indexes`:  The grain indexes to include in the dictionary
-    
-    Returns the dictionary of euler-bunge angles (rads)
-    """
-    
-    # Iterate through each grain
-    grain_dict = {}
-    for i in range(len(indexes)):
-        
-        # Initialise
-        grain_dict[f"g{i}_phi_1"] = []
-        grain_dict[f"g{i}_Phi"]   = []
-        grain_dict[f"g{i}_phi_2"] = []
-
-        # Get the trajectory of each grain throughout history
-        euler_list = [[], [], []]
-        for state in history:
-            orientations = pc_model.orientations(state)
-            euler = list(orientations[indexes[i]].to_euler(angle_type="radians", convention="bunge"))
-            for j in range(len(euler_list)):
-                euler_value = euler[j] if euler[j] > 0 else euler[j]+2*np.pi
-                euler_list[j].append(euler_value)
-
-        # Store the trajectories
-        grain_dict[f"g{i}_phi_1"] = euler_list[0]
-        grain_dict[f"g{i}_Phi"]   = euler_list[1]
-        grain_dict[f"g{i}_phi_2"] = euler_list[2]
-    
-    # Return dictionary
-    return grain_dict
+MAX_TIME = 300 # seconds
+EXP_PATH = f"data/reorientation.csv"
+INCLUDE = None
 
 # Gets the experimental data
 exp_dict = csv_to_dict(EXP_PATH)
-num_grains = len([field for field in exp_dict.keys() if "phi_1" in field])
+mappable_grain_ids = [int(field.replace("g","").replace("_phi_1","")) for field in exp_dict.keys() if "phi_1" in field]
+exit()
+
+num_grains = len()
 strain_rate = round_sf(max(exp_dict["strain"])/max(exp_dict["time"]), 5)
 
-# Initialises model
-model = Model(
-    grains_path = GRAINS_PATH,
-    structure   = "bcc",
-    lattice_a   = 1.0,
-    num_threads = 12,
-    strain_rate = strain_rate,
-    max_strain  = 0.30,
-    youngs      = 190000,
-    poissons    = 0.28,
-)
-
 # Initialise plotter
-direction = [[1,0,0], [0,1,0], [0,0,1]][1]
-ipf = IPF(model.get_lattice())
+lattice = crystallography.CubicLattice(1.0)
+lattice.add_slip_system([1,1,0], [1,1,1])
+# lattice.add_slip_system([1,1,1], [1,1,0])
+# lattice.add_slip_system([1,1,1], [1,2,3])
+# lattice.add_slip_system([1,1,1], [1,1,2])
+ipf = IPF(lattice)
 
 # Initialise indexes for grains to capture
+direction = [[1,0,0], [0,1,0], [0,0,1]][0]
 map_dict = csv_to_dict(MAPPING_PATH)
 start_indexes = [int(si)-1 for si in list(map_dict["start"])]
 end_indexes = [int(ei)-1 for ei in list(map_dict["end"])]

@@ -5,8 +5,9 @@ from cp_sim.helper import csv_to_dict
 from cp_sim.plotter import save_plot
 
 # Constants
-SIM_FILE = "results/phi_bcc.csv"
-EXP_FILE = "../data/tensile_p91.csv"
+SUM_ID   = "p91_s1"
+SIM_FILE = f"results/{SUM_ID}_phi.csv"
+EXP_FILE = f"../data/{SUM_ID}_exp.csv"
 
 def plot_boxplots(point_grid:list, ideal_grid:list, field_list:list) -> None:
     """
@@ -43,8 +44,7 @@ sim_dict = csv_to_dict(SIM_FILE)
 exp_dict = csv_to_dict(EXP_FILE)
 
 # Define fields to investigate
-# grain_indexes = [0,1,2,3,4]
-grain_indexes = [5,6,7,8,9]
+grain_indexes = [15,16,17,18,19,20]
 ori = lambda i : [f"g{i}_phi_1", f"g{i}_Phi", f"g{i}_phi_2"]
 field_list = [item for sublist in [ori(i) for i in grain_indexes] for item in sublist]
 sim_grid = [sim_dict[field] for field in field_list]
@@ -52,4 +52,4 @@ exp_grid = [[exp_dict[field][i] for i in [-1]] for field in field_list]
 
 # Plot boxplots
 plot_boxplots(sim_grid, exp_grid, field_list)
-save_plot("plot.png")
+save_plot("results/boxes.png")

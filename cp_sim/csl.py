@@ -8,7 +8,7 @@
 """
 
 # Libraries
-import numpy as np, math
+import numpy as np
 from orientation import random_euler, deg_to_rad, euler_to_matrix, matrix_to_euler, get_matrix_product, get_inverted
 
 # Dictionary of CSLs
@@ -181,18 +181,6 @@ def get_misorientations(euler_1:list, euler_2:list, type:str) -> list:
             misorientation = np.arccos(cw)
             misorientation_list.append(misorientation)
     return misorientation_list
-    # om_1 = euler_to_matrix(euler_1)
-    # om_2 = euler_to_matrix(euler_2)
-    # angle_list = []
-    # for sym in get_symmetry_matrices(type):
-    #     matrix_1 = get_matrix_product(sym, om_1)
-    #     matrix_2 = get_inverted(matrix_1)
-    #     matrix_3 = get_matrix_product(matrix_2, om_2)
-    #     a_angle = (matrix_3[0][0] + matrix_3[1][1] + matrix_3[2][2] - 1) / 2
-    #     a_angle = max(a_angle, -1)
-    #     angle = math.acos(a_angle)
-    #     angle_list.append(angle)
-    # return angle_list
 
 def get_disorientation(euler_1:list, euler_2:list, type:str) -> float:
     """
