@@ -101,13 +101,13 @@ for csv_file in csv_file_list:
         sum_tc_dict = append_to_dict(sum_tc_dict, f"y_{i+1}", round_sf(y_list[i], 5))
 
     # Add to orientation dictionary
-    for strain_interval in ["0p2", "0p4", "0p6", "0p8", "1p0"]:
-        for i in range(len(data_dict[f"{strain_interval}_phi_1"])):
+    for i, grain_id in enumerate(data_dict["grain_id"]):
+        for strain_interval in ["0p2", "0p4", "0p6", "0p8", "1p0"]:
             for phi in ["phi_1", "Phi", "phi_2"]:
                 label = f"{strain_interval}_{phi}"
                 value = data_dict[label][i]
                 value = round_sf(value if value > 0 else value + 2*math.pi, 5)
-                sum_phi_dict = append_to_dict(sum_phi_dict, f"g{i}_{label}", value)
+                sum_phi_dict = append_to_dict(sum_phi_dict, f"g{grain_id}_{label}", value)
 
     # Plot tensile curves
     plt.scatter(data_dict[STRAIN_HEADER], data_dict[STRESS_HEADER], color="silver")
