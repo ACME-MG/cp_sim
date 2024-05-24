@@ -14,8 +14,9 @@ from cp_sim.helper import round_sf, dict_to_csv, get_combinations, csv_to_dict
 import math
 
 # Paths
-EXP_PATH    = f"data/617_s1_exp.csv"
-GRAINS_PATH = f"data/617_s1_grains.csv"
+EXP_PATH     = f"data/617_s1_exp.csv"
+GRAINS_PATH  = f"data/617_s1_grains.csv"
+RESULTS_PATH = "results"
 
 # Model constants
 MAX_TIME    = 300 # seconds
@@ -100,19 +101,12 @@ def get_grain_dict(strain_list:list, history:list, grain_ids:list) -> dict:
 # Define parameter domains
 index_1 = int(sys.argv[1])
 index_2 = int(sys.argv[2])
-# all_params_dict = {
-#     "tau_sat": [[100, 200, 400, 800][index_1]],
-#     "b":       [0.5, 1, 2, 4, 8, 16],
-#     "tau_0":   [[100, 200, 400, 800][index_2]],
-#     "gamma_0": [round_sf(STRAIN_RATE/3, 4)],
-#     "n":       [1, 2, 4, 8, 16, 32],
-# }
 all_params_dict = {
-    "tau_sat": [200],
-    "b":       [2],
-    "tau_0":   [800],
+    "tau_sat": [[100, 200, 400, 800][index_1]],
+    "b":       [0.5, 1, 2, 4, 8, 16],
+    "tau_0":   [[100, 200, 400, 800][index_2]],
     "gamma_0": [round_sf(STRAIN_RATE/3, 4)],
-    "n":       [2],
+    "n":       [1, 2, 4, 8, 16, 32],
 }
 
 # Initialise model
@@ -139,7 +133,7 @@ for i, combination in enumerate(combinations):
     # Initialise
     index_str = str(i+1).zfill(3)
     param_dict = dict(zip(param_names, combination))
-    results_path = f"results/{index_1}_{index_2}_{index_str}"
+    results_path = f"{RESULTS_PATH}/{index_1}_{index_2}_{index_str}"
 
     # Prepare the thread for the function
     model.define_params(**param_dict)
