@@ -103,9 +103,9 @@ def get_grain_dict(strain_list:list, history:list, grain_ids:list) -> dict:
 index_1 = int(sys.argv[1])
 index_2 = int(sys.argv[2])
 all_params_dict = {
-    "tau_sat": [[200, 400, 800, 1000][index_1]],
+    "tau_sat": [[100, 200, 400, 800][index_1]],
     "b":       [0.5, 1, 2, 4, 8, 16],
-    "tau_0":   [[200, 400, 800, 1000][index_2]],
+    "tau_0":   [[100, 200, 400, 800][index_2]],
     "gamma_0": [round_sf(STRAIN_RATE/3, 4)],
     "n":       [1, 2, 4, 8, 16, 32],
 }
@@ -124,7 +124,7 @@ model = Model(
 
 # Initialise specific grains
 exp_dict = csv_to_dict(EXP_PATH)
-grain_ids = [int(key.replace("g","").replace("_phi_1",""))-1 for key in exp_dict.keys() if "phi_1" in key]
+grain_ids = [int(key.replace("g","").replace("_phi_1","")) for key in exp_dict.keys() if "phi_1" in key]
 
 # Iterate through the parameters
 combinations = get_combinations(all_params_dict)

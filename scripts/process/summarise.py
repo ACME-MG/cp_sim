@@ -14,8 +14,8 @@ from cp_sim.interpolator import Interpolator
 
 # Constants
 RESULTS_DIR     = "results"
-SUMMARY_ID      = "p91_s1"
-SAMPLE_PATH     = "/mnt/c/Users/Janzen/OneDrive - UNSW/PhD/results/cp_neml/20240519 (cpd_s1_p91)"
+SUMMARY_ID      = "617_s1"
+SAMPLE_PATH     = "/mnt/c/Users/Janzen/OneDrive - UNSW/PhD/results/cp_neml/20240526 (cp_617_s1)"
 PARAM_NAME_LIST = ["tau_sat", "b", "tau_0", "gamma_0", "n"]
 STRAIN_HEADER   = "strain"
 STRESS_HEADER   = "stress"
@@ -92,7 +92,7 @@ for csv_file in csv_file_list:
     sum_phi_dict = append_list_dict(sum_phi_dict, param_dict)
 
     # Add to tensile curve dictionary
-    interpolator = Interpolator(data_dict[STRAIN_HEADER], data_dict[STRESS_HEADER])
+    interpolator = Interpolator(data_dict[STRAIN_HEADER], data_dict[STRESS_HEADER], resolution=100)
     x_end  = max(data_dict[STRAIN_HEADER])
     x_list = [x_end/(NUM_STRAINS-1)*j for j in range(NUM_STRAINS)]
     y_list = interpolator.evaluate(x_list)
@@ -107,7 +107,7 @@ for csv_file in csv_file_list:
                 label = f"{strain_interval}_{phi}"
                 value = data_dict[label][i]
                 value = round_sf(value if value > 0 else value + 2*math.pi, 5)
-                sum_phi_dict = append_to_dict(sum_phi_dict, f"g{grain_id}_{label}", value)
+                sum_phi_dict = append_to_dict(sum_phi_dict, f"g{int(grain_id)}_{label}", value)
 
     # Plot tensile curves
     plt.scatter(data_dict[STRAIN_HEADER], data_dict[STRESS_HEADER], color="silver")

@@ -5,7 +5,7 @@ from cp_sim.helper import csv_to_dict
 from cp_sim.plotter import save_plot
 
 # Constants
-SUM_ID   = "p91_s1"
+SUM_ID   = "617_s1"
 SIM_FILE = f"results/{SUM_ID}_phi.csv"
 EXP_FILE = f"../data/{SUM_ID}_exp.csv"
 
@@ -39,17 +39,27 @@ def plot_boxplots(point_grid:list, ideal_grid:list, field_list:list) -> None:
         axis.set_xticklabels([])
         axis.grid(axis="y")
 
-# Read experimental and simulation data
-sim_dict = csv_to_dict(SIM_FILE)
-exp_dict = csv_to_dict(EXP_FILE)
+# Define fields
+grain_indexes = [75, 189, 314, 338, 463]
+phi_list = ["phi_1", "Phi", "phi_2"]
+strain_intervals = ["0p2", "0p4", "0p6", "0p8", "1p0"]
 
-# Define fields to investigate
-grain_indexes = [15,16,17,18,19,20]
-ori = lambda i : [f"g{i}_phi_1", f"g{i}_Phi", f"g{i}_phi_2"]
-field_list = [item for sublist in [ori(i) for i in grain_indexes] for item in sublist]
-sim_grid = [sim_dict[field] for field in field_list]
-exp_grid = [[exp_dict[field][i] for i in [-1]] for field in field_list]
+# Get experimental data
+exp_dict = csv_to_dict(EXP_FILE)
+exp_grid = []
+for grain_index in grain_indexes:
+    exp_list = [exp_dict[f"g{grain_index}_{phi}"] for grain_index in grain_indexes for phi in phi_list]
+    exp_grid.append(exp_list)
+
+# Get simulation data
+sim_dict = csv_to_dict(SIM_FILE)
+sim_grid = []
+for grain_index in grain_indexes:
+    sim_list = [sim_dict[f"g{grain_index}_{strain_interval}_{phi}"] for grain_index in grain_indexes
+                for strain_interval in strain_intervals for phi in phi_list]
+    sim_grid.append(sim_list)
 
 # Plot boxplots
+field_list = [f"g{grain_index}_{phi}" for grain_index in grain_indexes for phi in phi_list]
 plot_boxplots(sim_grid, exp_grid, field_list)
 save_plot("results/boxes.png")
