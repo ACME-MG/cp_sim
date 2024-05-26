@@ -40,7 +40,7 @@ def plot_boxplots(point_grid:list, ideal_grid:list, field_list:list) -> None:
         axis.grid(axis="y")
 
 # Define fields
-grain_indexes = [75, 189, 314, 338, 463]
+grain_indexes = [75] # [75, 189, 314, 338, 463]
 phi_list = ["phi_1", "Phi", "phi_2"]
 strain_intervals = ["0p2", "0p4", "0p6", "0p8", "1p0"]
 
@@ -48,16 +48,17 @@ strain_intervals = ["0p2", "0p4", "0p6", "0p8", "1p0"]
 exp_dict = csv_to_dict(EXP_FILE)
 exp_grid = []
 for grain_index in grain_indexes:
-    exp_list = [exp_dict[f"g{grain_index}_{phi}"] for grain_index in grain_indexes for phi in phi_list]
-    exp_grid.append(exp_list)
+    for phi in phi_list:
+        exp_grid.append(exp_dict[f"g{grain_index}_{phi}"])
 
 # Get simulation data
 sim_dict = csv_to_dict(SIM_FILE)
 sim_grid = []
+flatten = lambda nested_list : [item for sublist in nested_list for item in sublist]
 for grain_index in grain_indexes:
-    sim_list = [sim_dict[f"g{grain_index}_{strain_interval}_{phi}"] for grain_index in grain_indexes
-                for strain_interval in strain_intervals for phi in phi_list]
-    sim_grid.append(sim_list)
+    for phi in phi_list:
+        sim_list = [sim_dict[f"g{grain_index}_{strain_interval}_{phi}"] for strain_interval in strain_intervals]
+        sim_grid.append(flatten(sim_list))
 
 # Plot boxplots
 field_list = [f"g{grain_index}_{phi}" for grain_index in grain_indexes for phi in phi_list]

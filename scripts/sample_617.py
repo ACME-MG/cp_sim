@@ -20,7 +20,7 @@ RESULTS_PATH = "results"
 
 # Model constants
 MAX_TIME    = 300 # seconds
-MAX_STRAIN  = 0.2
+MAX_STRAIN  = 1.0
 STRAIN_RATE = 1e-4
 LATTICE     = 1.0
 THIN_AMOUNT = 100
