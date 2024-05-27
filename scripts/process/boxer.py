@@ -5,9 +5,10 @@ from cp_sim.helper import csv_to_dict
 from cp_sim.plotter import save_plot
 
 # Constants
+GRAIN_IDS = [75, 189, 314, 346, 463]
 SUM_ID   = "617_s1"
-SIM_FILE = f"results/{SUM_ID}_phi.csv"
-EXP_FILE = f"../data/{SUM_ID}_exp.csv"
+SIM_PATH = f"results/{SUM_ID}_phi.csv"
+EXP_PATH = f"../data/{SUM_ID}_exp.csv"
 
 def plot_boxplots(point_grid:list, ideal_grid:list, field_list:list) -> None:
     """
@@ -40,27 +41,26 @@ def plot_boxplots(point_grid:list, ideal_grid:list, field_list:list) -> None:
         axis.grid(axis="y")
 
 # Define fields
-grain_indexes = [75] # [75, 189, 314, 338, 463]
 phi_list = ["phi_1", "Phi", "phi_2"]
 strain_intervals = ["0p2", "0p4", "0p6", "0p8", "1p0"]
 
 # Get experimental data
-exp_dict = csv_to_dict(EXP_FILE)
+exp_dict = csv_to_dict(EXP_PATH)
 exp_grid = []
-for grain_index in grain_indexes:
+for grain_id in GRAIN_IDS:
     for phi in phi_list:
-        exp_grid.append(exp_dict[f"g{grain_index}_{phi}"])
+        exp_grid.append(exp_dict[f"g{grain_id}_{phi}"])
 
 # Get simulation data
-sim_dict = csv_to_dict(SIM_FILE)
+sim_dict = csv_to_dict(SIM_PATH)
 sim_grid = []
 flatten = lambda nested_list : [item for sublist in nested_list for item in sublist]
-for grain_index in grain_indexes:
+for grain_id in GRAIN_IDS:
     for phi in phi_list:
-        sim_list = [sim_dict[f"g{grain_index}_{strain_interval}_{phi}"] for strain_interval in strain_intervals]
+        sim_list = [sim_dict[f"g{grain_id}_{strain_interval}_{phi}"] for strain_interval in strain_intervals]
         sim_grid.append(flatten(sim_list))
 
 # Plot boxplots
-field_list = [f"g{grain_index}_{phi}" for grain_index in grain_indexes for phi in phi_list]
+field_list = [f"g{grain_id}_{phi}" for grain_id in GRAIN_IDS for phi in phi_list]
 plot_boxplots(sim_grid, exp_grid, field_list)
 save_plot("results/boxes.png")

@@ -240,6 +240,26 @@ class IPF:
                 plotter = getattr(axis, function)
                 plotter(points[:,0], points[:,1], **settings)
 
+def get_lattice(structure:str="fcc"):
+    """
+    Gets the lattice object
+
+    Parameters:
+    * `structure`: The crystal structure
+
+    Returns the lattice object
+    """
+    lattice = crystallography.CubicLattice(1.0)
+    if structure == "bcc":
+        lattice.add_slip_system([1,1,0], [1,1,1])
+    elif structure == "fcc":
+        lattice.add_slip_system([1,1,1], [1,1,0])
+        lattice.add_slip_system([1,1,1], [1,2,3])
+        lattice.add_slip_system([1,1,1], [1,1,2])
+    else:
+        raise ValueError(f"Crystal structure '{structure}' unsupported!")
+    return lattice
+
 def get_trajectories(euler_history:list, index_list:list=None) -> list:
     """
     Converts a history of euler angles into a list of trajectories

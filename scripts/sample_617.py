@@ -20,7 +20,7 @@ RESULTS_PATH = "results"
 
 # Model constants
 MAX_TIME    = 300 # seconds
-MAX_STRAIN  = 1.0
+MAX_STRAIN  = 0.2
 STRAIN_RATE = 1e-4
 LATTICE     = 1.0
 THIN_AMOUNT = 100
@@ -106,7 +106,8 @@ all_params_dict = {
     "tau_sat": [[100, 200, 400, 800][index_1]],
     "b":       [0.5, 1, 2, 4, 8, 16],
     "tau_0":   [[100, 200, 400, 800][index_2]],
-    "gamma_0": [round_sf(STRAIN_RATE/3, 4)],
+    # "gamma_0": [round_sf(STRAIN_RATE/3, 4)],
+    "gamma_0": [10**i for i in [-5,-4,-3,-2,-1]],
     "n":       [1, 2, 4, 8, 16, 32],
 }
 

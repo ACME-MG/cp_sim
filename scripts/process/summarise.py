@@ -73,7 +73,7 @@ for csv_file in csv_file_list:
 
     # Check whether the simulation failed or timed out
     failed = False
-    for keyword in ["failed", "timeout"]:
+    for keyword in ["failed", "timeout", "unoriented"]:
         if keyword in csv_file:
             sum_fail_dict = append_list_dict(sum_fail_dict, param_dict)
             sum_fail_dict = append_to_dict(sum_fail_dict, "reason", keyword)

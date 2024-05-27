@@ -8,6 +8,18 @@
 # Libraries
 import itertools, numpy as np, math
 
+def transpose(list_of_lists:list) -> list:
+    """
+    Transposes a 2D list of lists
+    
+    Parameters:
+    * `list_of_lists`: A list of lists (i.e., a 2D grid)
+    
+    Returns the transposed list of lists
+    """
+    transposed = np.array(list_of_lists).T.tolist()
+    return transposed
+
 def round_sf(value:float, sf:int) -> float:
     """
     Rounds a float to a number of significant figures

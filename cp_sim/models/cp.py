@@ -91,7 +91,8 @@ class Model:
         i_model    = inelasticity.AsaroInelasticity(slip_model)
         k_model    = kinematics.StandardKinematicModel(e_model, i_model)
         sc_model   = singlecrystal.SingleCrystalModel(k_model, self.lattice, miter=16, max_divide=2, verbose=False)
-        pc_model   = polycrystal.TaylorModel(sc_model, self.orientations, nthreads=self.num_threads, weights=self.weights) # problem
+        pc_model   = polycrystal.TaylorModel(sc_model, self.orientations, nthreads=self.num_threads) # problem
+        # pc_model   = polycrystal.TaylorModel(sc_model, self.orientations, nthreads=self.num_threads, weights=self.weights) # problem
         results    = drivers.uniaxial_test(pc_model, self.strain_rate, emax=self.max_strain, nsteps=500, rtol=1e-6,
                                            atol=1e-10, miter=25, verbose=False, full_results=True)
         self.model_output = (sc_model, pc_model, results)

@@ -1,76 +1,56 @@
 # Libraries
 import sys; sys.path += ["../.."]
-from cp_sim.models.cp import Model
 from cp_sim.helper import csv_to_dict
-from cp_sim.pole_figure import IPF, get_trajectories
-from cp_sim.helper import csv_to_dict
+from cp_sim.pole_figure import get_lattice, IPF
 from cp_sim.plotter import save_plot, define_legend
 
-# Constants
-GRAIN_INDEXES = [0, 1, 2]
-SIM_PATH      = "results/phi_bcc.csv"
-EXP_PATH      = "../data/tensile_p91.csv"
-GRAINS_PATH   = "../data/grain_p91.csv"
-MAPPING_PATH  = "../data/mapping_p91.csv"
+# Paths
+SUM_ID    = "617_s1"
+SIM_PATH  = f"results/{SUM_ID}_phi.csv"
+EXP_PATH  = f"../data/{SUM_ID}_exp.csv"
 
-# Initialises model
-model = Model(
-    grains_path = GRAINS_PATH,
-    structure   = "bcc",
-    lattice_a   = 1.0,
-    num_threads = 12,
-    strain_rate = 1.0e-4,
-    max_strain  = 0.30,
-    youngs      = 190000,
-    poissons    = 0.28,
-)
+# Parameters
+GRAIN_IDS = [75, 189, 314, 346, 463]
+PHI_LIST  = ["phi_1", "Phi", "phi_2"]
+STRAINS   = ["0p2", "0p4", "0p6", "0p8", "1p0"]
+
+# Read experimental and simulated data
+exp_dict = csv_to_dict(EXP_PATH)
+exp_size = len(exp_dict[f"g{GRAIN_IDS[0]}_{PHI_LIST[0]}"])
+sim_dict = csv_to_dict(SIM_PATH)
+num_sims = len(sim_dict[f"g{GRAIN_IDS[0]}_{STRAINS[0]}_{PHI_LIST[0]}"])
+
+# Get experimental trajectories
+exp_trajectories = []
+for grain_id in GRAIN_IDS:
+    exp_trajectory = []
+    for i in range(exp_size):
+        exp_trajectory.append([exp_dict[f"g{grain_id}_{phi}"][i] for phi in PHI_LIST])
+    exp_trajectories.append(exp_trajectory)
+
+# Get simulation trajectories
+sim_trajectories = []
+for grain_id in GRAIN_IDS:
+    for i in range(num_sims):
+        sim_trajectory = []
+        for strain in STRAINS:
+            sim_trajectory.append([sim_dict[f"g{grain_id}_{strain}_{phi}"][i] for phi in PHI_LIST]) 
+        sim_trajectories.append(sim_trajectory)
 
 # Initialise plotter
-direction = [[1,0,0], [0,1,0], [0,0,1]][1]
-ipf = IPF(model.get_lattice())
-
-# Initialise grain mapping
-map_dict = csv_to_dict(MAPPING_PATH)
-start_indexes = [int(si)-1 for si in list(map_dict["start"])]
-end_indexes = [int(ei)-1 for ei in list(map_dict["end"])]
-
-# Read experimental data
-exp_dict = csv_to_dict(EXP_PATH)
-num_grains = len([field for field in exp_dict.keys() if "phi_1" in field])
-exp_history = [[] for _ in range(2)] # start and end
-for i in range(num_grains):
-    phi_1 = exp_dict[f"g{i}_phi_1"]
-    Phi   = exp_dict[f"g{i}_Phi"]
-    phi_2 = exp_dict[f"g{i}_phi_2"]
-    exp_history[0].append([phi_1[0], Phi[0], phi_2[0]])
-    exp_history[1].append([phi_1[-1], Phi[-1], phi_2[-1]])
+direction = [[1,0,0], [0,1,0], [0,0,1]][0]
+ipf = IPF(get_lattice("fcc"))
 
 # Plot experimental trajectories
-exp_trajectories = get_trajectories(exp_history, GRAIN_INDEXES)
 ipf.plot_ipf_trajectory(exp_trajectories, direction, "plot", {"color": "darkgray", "linewidth": 2})
 ipf.plot_ipf_trajectory(exp_trajectories, direction, "arrow", {"color": "darkgray", "head_width": 0.01, "head_length": 0.015})
 for i, et in enumerate(exp_trajectories):
     ipf.plot_ipf_trajectory([[et[0]]], direction, "scatter", {"color": "darkgray", "s": 8**2})
-    ipf.plot_ipf_trajectory([[et[0]]], direction, "text", {"color": "black", "fontsize": 8, "s": start_indexes[GRAIN_INDEXES[i]]+1})
-    ipf.plot_ipf_trajectory([[et[-1]]], direction, "text", {"color": "black", "fontsize": 8, "s": end_indexes[GRAIN_INDEXES[i]]+1})
+    ipf.plot_ipf_trajectory([[et[0]]], direction, "text", {"color": "black", "fontsize": 8, "s": GRAIN_IDS[i]})
 
-# Read simulated data
-sim_dict = csv_to_dict(SIM_PATH)
-num_sims = len(sim_dict[list(sim_dict.keys())[0]])
-sim_history_list = []
-for i in range(num_sims):
-    sim_history = [[] for _ in range(2)]
-    for j in range(num_grains):
-        fields = [f"g{j}_phi_1", f"g{j}_Phi", f"g{j}_phi_2"]
-        sim_history[0].append(exp_history[0][j])
-        sim_history[1].append([sim_dict[field][i] for field in fields])
-    sim_history_list.append(sim_history)
-
-# Plot simulated trajectories
-for i, sim_history in enumerate(sim_history_list):
-    sim_trajectories = get_trajectories(sim_history, GRAIN_INDEXES)
-    ipf.plot_ipf_trajectory([[st[-1]] for st in sim_trajectories], direction, "scatter", {"color": "green", "s": 6**2})
+# Plot the simulated trajectories
+ipf.plot_ipf_trajectory(sim_trajectories, direction, "scatter", {"color": "green", "s": 6**2})
 
 # Save
-define_legend(["darkgray", "black"], ["Experimental", "Simulation"], [7, 1.5], ["scatter", "line"])
+define_legend(["darkgray", "green"], ["Experimental", "Simulation"], [2, 6], ["line", "scatter"])
 save_plot("plot_ipf.png")
