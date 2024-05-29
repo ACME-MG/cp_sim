@@ -1,8 +1,9 @@
 # Libraries
 import sys; sys.path += ["../.."]
 from cp_sim.helper.general import csv_to_dict
-from cp_sim.io.pole_figure import get_lattice, IPF
+from cp_sim.io.pole_figure import IPF
 from cp_sim.io.plotter import save_plot, define_legend
+from cp_sim.simulate import get_lattice
 
 # Paths
 SUM_ID    = "617_s1"
