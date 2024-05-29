@@ -6,7 +6,7 @@
 """
 
 # Libraries
-import itertools, numpy as np, math
+import numpy as np, math, os
 
 def transpose(list_of_lists:list) -> list:
     """
@@ -127,20 +127,6 @@ def get_sorted(value_list:list, reverse:bool=True) -> tuple:
                 break
     return sorted_value_list, sorted_index_list
 
-def get_combinations(params_dict:dict) -> list:
-    """
-    Returns a list of possible combinations of a set of parameters
-    
-    Parameters:
-    * `params_dict`: Dictionary of parameter lists
-
-    Returns the list of parameter combinations
-    """
-    param_list = list(params_dict.values())
-    combinations = list(itertools.product(*param_list))
-    combinations = [list(c) for c in combinations]
-    return combinations
-
 def transpose(list_of_lists:list) -> list:
     """
     Transposes a 2D list of lists
@@ -180,3 +166,16 @@ def get_thinned_list(unthinned_list:list, density:int) -> list:
     thin_indexes = [0] + thin_indexes + [src_data_size - 1]
     thinned_list = [unthinned_list[i] for i in thin_indexes]
     return thinned_list
+
+def safe_mkdir(dir_path:str) -> None:
+    """
+    For safely making a directory
+
+    Parameters:
+    * `dir_path`: The path to the directory
+    """
+    try:
+        os.mkdir(dir_path)
+    except FileExistsError:
+        pass
+

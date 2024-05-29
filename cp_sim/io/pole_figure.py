@@ -11,7 +11,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from neml.math import rotations, tensors
 from neml.cp import crystallography
-from cp_sim.helper import flatten
+from cp_sim.helper.general import flatten
 
 # Pole figure class
 class PF:
@@ -239,45 +239,6 @@ class IPF:
             else:
                 plotter = getattr(axis, function)
                 plotter(points[:,0], points[:,1], **settings)
-
-def get_lattice(structure:str="fcc"):
-    """
-    Gets the lattice object
-
-    Parameters:
-    * `structure`: The crystal structure
-
-    Returns the lattice object
-    """
-    lattice = crystallography.CubicLattice(1.0)
-    if structure == "bcc":
-        lattice.add_slip_system([1,1,0], [1,1,1])
-    elif structure == "fcc":
-        lattice.add_slip_system([1,1,1], [1,1,0])
-        lattice.add_slip_system([1,1,1], [1,2,3])
-        lattice.add_slip_system([1,1,1], [1,1,2])
-    else:
-        raise ValueError(f"Crystal structure '{structure}' unsupported!")
-    return lattice
-
-def get_trajectories(euler_history:list, index_list:list=None) -> list:
-    """
-    Converts a history of euler angles into a list of trajectories
-
-    Parameters:
-    * `euler_history`: The history of orientations in euler-bunge form (rads)
-    * `index_list`:    The list of indexes to include; if undefined, includes
-                       all the trajectories
-
-    Returns the list of trajectories
-    """
-    trajectories = []
-    for i in range(len(euler_history[0])):
-        if index_list != None and not i in index_list:
-            continue
-        trajectory = [euler_state[i] for euler_state in euler_history]
-        trajectories.append(trajectory)
-    return trajectories
 
 def get_colours(orientations:list, values:list) -> list:
     """

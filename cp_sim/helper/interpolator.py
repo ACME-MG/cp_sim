@@ -8,7 +8,7 @@
 # Libraries
 import numpy as np
 from scipy.interpolate import splev, splrep
-from cp_sim.helper import get_thinned_list
+from cp_sim.helper.general import get_thinned_list
 
 # The Interpolator Class
 class Interpolator:

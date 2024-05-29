@@ -9,13 +9,13 @@
 import os, math
 import matplotlib.pyplot as plt
 import sys; sys.path += ["../.."]
-from cp_sim.helper import csv_to_dict, dict_to_csv, round_sf
-from cp_sim.interpolator import Interpolator
+from cp_sim.helper.general import csv_to_dict, dict_to_csv, round_sf
+from cp_sim.helper.interpolator import Interpolator
 
 # Constants
 RESULTS_DIR     = "results"
 SUMMARY_ID      = "617_s1"
-SAMPLE_PATH     = "/mnt/c/Users/Janzen/OneDrive - UNSW/PhD/results/cp_neml/20240526 (cp_617_s1)"
+SAMPLE_PATH     = "/mnt/c/Users/Janzen/OneDrive - UNSW/PhD/results/cp_neml/2024-05-28 (617_s1_unweighted)"
 PARAM_NAME_LIST = ["tau_sat", "b", "tau_0", "gamma_0", "n"]
 STRAIN_HEADER   = "strain"
 STRESS_HEADER   = "stress"
