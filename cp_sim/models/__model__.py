@@ -17,7 +17,7 @@ class __Model__:
         Class for defining a model
         """
         self.name = name
-        self.outputs = None
+        self.output = None
 
     def get_name(self) -> str:
         """

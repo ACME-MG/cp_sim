@@ -158,7 +158,7 @@ def get_trajectories(euler_history:list, index_list:list=None) -> list:
         trajectories.append(trajectory)
     return trajectories
 
-def get_grain_dict(strain_list:list, history:list, grain_ids:list, max_strain:float) -> dict:
+def get_grain_dict(strain_list:list, history:list, grain_ids:list) -> dict:
     """
     Creates a dictionary of grain information
 
@@ -166,7 +166,6 @@ def get_grain_dict(strain_list:list, history:list, grain_ids:list, max_strain:fl
     * `strain_list`: The list of strain values
     * `history`:     The orientation history
     * `grain_ids`:   The grain indexes to include in the dictionary (starts at 1)
-    * `max_strain`:  The maximum strain
     
     Returns the dictionary of euler-bunge angles (rads)
     """
@@ -182,12 +181,13 @@ def get_grain_dict(strain_list:list, history:list, grain_ids:list, max_strain:fl
         for euler_value in ["phi_1", "Phi", "phi_2"]:
             grain_dict[f"{strain_interval}_{euler_value}"] = []
     
-    # Define domain of orientations
+    # Initialise orientation interpolation
     domain = lambda x : round_sf(x, 5) if x>0 else round_sf(x+2*math.pi, 5)
+    num_intervals = len(strain_intervals)
+    max_strain    = max(strain_list)
+    strain_values = [max_strain*(i+1)/num_intervals for i in range(num_intervals)]
 
     # Get orientations at different strain intervals
-    num_intervals = len(strain_intervals)
-    strain_values = [max_strain*(i+1)/num_intervals for i in range(num_intervals)]
     for trajectory in trajectories:
 
         # Get orientations

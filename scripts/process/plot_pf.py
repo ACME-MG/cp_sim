@@ -27,6 +27,6 @@ pf = PF(get_lattice("fcc"))
 
 # Plot simulated and experimental pole figures
 pf.plot_pf(exp_orientations, direction)
-save_plot("plot_exp_pf.png")
+save_plot("results/plot_exp_pf.png")
 pf.plot_pf(sim_orientations, direction)
-save_plot("plot_sim_pf.png")
+save_plot("results/plot_sim_pf.png")

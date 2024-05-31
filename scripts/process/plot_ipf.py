@@ -54,4 +54,4 @@ ipf.plot_ipf_trajectory(sim_trajectories, direction, "scatter", {"color": "green
 
 # Save
 define_legend(["darkgray", "green"], ["Experimental", "Simulation"], [2, 6], ["line", "scatter"])
-save_plot("plot_ipf.png")
+save_plot("results/plot_ipf.png")
