@@ -24,7 +24,8 @@ THIN_AMOUNT = 100
 
 # Get grain IDs
 exp_dict = csv_to_dict(EXP_PATH)
-grain_ids = [int(key.replace("g","").replace("_phi_1","")) for key in exp_dict.keys() if "phi_1" in key]
+# grain_ids = [int(key.replace("g","").replace("_phi_1","")) for key in exp_dict.keys() if "phi_1" in key]
+grain_ids = [314]
 
 # Get model
 model = sim.get_model(
