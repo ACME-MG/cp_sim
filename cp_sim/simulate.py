@@ -173,8 +173,7 @@ def get_grain_dict(strain_list:list, history:list, grain_ids:list, max_strain:fl
 
     # Reformat orientations
     index_list = [grain_id-1 for grain_id in grain_ids] # starts at 0
-    # trajectories = get_trajectories(history, index_list)
-    trajectories = get_trajectories(history, [0])
+    trajectories = get_trajectories(history, index_list)
 
     # Initialise grain dictionary (20%, 40$, .., 100% of max strain)
     strain_intervals = ["0p2", "0p4", "0p6", "0p8", "1p0"]

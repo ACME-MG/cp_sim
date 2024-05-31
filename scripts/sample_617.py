@@ -18,21 +18,20 @@ RESULTS_PATH = "results"
 # Constants
 NUM_THREADS = 12
 STRAIN_RATE = 1e-4
-MAX_STRAIN  = 0.2
-MAX_TIME    = 300 # seconds
+MAX_STRAIN  = 1.0
+MAX_TIME    = 1200 # seconds
 THIN_AMOUNT = 100
 
 # Get grain IDs
 exp_dict = csv_to_dict(EXP_PATH)
-# grain_ids = [int(key.replace("g","").replace("_phi_1","")) for key in exp_dict.keys() if "phi_1" in key]
-grain_ids = [314]
+grain_ids = [int(key.replace("g","").replace("_phi_1","")) for key in exp_dict.keys() if "phi_1" in key]
 
 # Get model
 model = sim.get_model(
     model_name   = "cp",
     lattice      = sim.get_lattice("fcc"),
-    orientations = [sim.get_orientations(GRAINS_PATH)[313]],
-    weights      = [sim.get_weights(GRAINS_PATH)[313]],
+    orientations = sim.get_orientations(GRAINS_PATH),
+    weights      = sim.get_weights(GRAINS_PATH),
     num_threads  = NUM_THREADS,
     strain_rate  = STRAIN_RATE,
     max_strain   = MAX_STRAIN,
