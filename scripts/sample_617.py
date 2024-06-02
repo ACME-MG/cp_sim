@@ -18,7 +18,7 @@ RESULTS_PATH = "results"
 # Constants
 NUM_THREADS = 12
 STRAIN_RATE = 1e-4
-MAX_STRAIN  = 1.0
+MAX_STRAIN  = 0.2
 MAX_TIME    = 1800 # seconds
 THIN_AMOUNT = 100
 
