@@ -34,13 +34,14 @@ def round_sf(value:float, sf:int) -> float:
     rounded_value = float(format_str.format(value))
     return rounded_value
 
-def dict_to_csv(data_dict:dict, csv_path:str) -> None:
+def dict_to_csv(data_dict:dict, csv_path:str, include_header:bool=True) -> None:
     """
     Converts a dictionary to a CSV file
     
     Parameters:
-    * `data_dict`: The dictionary to be converted
-    * `csv_path`: The path that the CSV file will be written to
+    * `data_dict`:      The dictionary to be converted
+    * `csv_path`:       The path that the CSV file will be written to
+    * `include_header`: Whether to include the header
     """
     
     # Extract and check headers
@@ -55,7 +56,8 @@ def dict_to_csv(data_dict:dict, csv_path:str) -> None:
     
     # Open CSV file and write headers
     csv_fh = open(csv_path, "w+")
-    csv_fh.write(",".join(headers) + "\n")
+    if include_header:
+        csv_fh.write(",".join(headers) + "\n")
     
     # Write data and close
     max_list_size = max([len(data_dict[header]) for header in headers])

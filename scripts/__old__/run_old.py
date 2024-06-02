@@ -7,15 +7,15 @@
 
 # Libraries
 import sys; sys.path += [".."]
+import numpy as np
 import cp_sim.simulate as sim 
-from cp_sim.helper.general import csv_to_dict, dict_to_csv, round_sf, get_thinned_list, transpose
+from cp_sim.helper.general import dict_to_csv, round_sf, transpose
 from cp_sim.io.pole_figure import PF
 from cp_sim.io.plotter import save_plot
 from cp_sim.simulate import get_lattice
 
 # Paths
-EXP_PATH     = f"data/617_s1_exp.csv"
-GRAINS_PATH  = f"data/617_s1_grains.csv"
+GRAINS_PATH  = f"data/old_grains.csv"
 RESULTS_PATH = "results"
 
 # Constants
@@ -26,15 +26,13 @@ MAX_TIME    = 3000 # seconds
 THIN_AMOUNT = 100
 
 # Get grain IDs
-exp_dict = csv_to_dict(EXP_PATH) # passive
-# grain_ids = [int(key.replace("g","").replace("_phi_1","")) for key in exp_dict.keys() if "phi_1" in key]
 grain_ids = [i+1 for i in range(len(sim.get_orientations(GRAINS_PATH)))]
 
 # Get model
 model = sim.get_model(
     model_name   = "cp",
     lattice      = sim.get_lattice("fcc"),
-    orientations = sim.get_orientations(GRAINS_PATH, angle_type="radians", is_passive=True), # passive to active
+    orientations = sim.get_orientations(GRAINS_PATH, "degrees"),
     weights      = sim.get_weights(GRAINS_PATH),
     num_threads  = NUM_THREADS,
     strain_rate  = STRAIN_RATE,
@@ -45,31 +43,35 @@ model = sim.get_model(
 
 # Initialise
 param_dict = {"tau_sat": 95, "b": 0.25, "tau_0": 820, "gamma_0": round_sf(STRAIN_RATE/3, 4), "n": 4.5}
-results_path = f"{RESULTS_PATH}/617"
+results_path = f"{RESULTS_PATH}/old"
 
 # Runs the model
 status = model.run(param_dict, max_time=MAX_TIME)
 if status != "success":
     dict_to_csv(param_dict, f"{results_path}_{status}.csv")
     exit()
-_, pc_model, results = model.get_output() # active to passive
+_, pc_model, results = model.get_output()
 
-# Process results
+# Save final orientations (1)
 strain_list = [round_sf(s[0], 5) for s in results["strain"]]
-stress_list = [round_sf(s[0], 5) for s in results["stress"]]
-history     = sim.get_orientation_history(pc_model, results, inverse=False) # passive
+history     = sim.get_orientation_history(pc_model, results, False)
 grain_dict  = sim.get_grain_dict(strain_list, history, grain_ids)
-data_dict   = {"strain": get_thinned_list(strain_list, THIN_AMOUNT), "stress": get_thinned_list(stress_list, THIN_AMOUNT)}
+orientation_list_1 = [grain_dict[phi] for phi in ["1p0_phi_1", "1p0_Phi", "1p0_phi_2"]]
+orientation_list_1 = transpose(orientation_list_1)
 
-# Check and save results
-if grain_dict == None:
-    dict_to_csv(param_dict, f"{results_path}_unoriented.csv")
-else:
-    dict_to_csv({**param_dict, **data_dict, **grain_dict}, f"{results_path}.csv")
+# Save final orientations (2)
+final_state = np.array(results["history"])[-1]
+orientation_list_2 = []
+for orientation in pc_model.orientations(final_state):
+    euler = list(orientation.to_euler(angle_type="radians", convention="bunge"))
+    # euler = sim.reorient(euler)
+    orientation_list_2.append(euler)
 
+# Plot experimental final orientations
 direction = [[1,0,0], [1,1,0], [1,1,1]][0]
 pf = PF(get_lattice("fcc"))
-orientation_list = [grain_dict[phi] for phi in ["1p0_phi_1", "1p0_Phi", "1p0_phi_2"]]
-orientation_list = transpose(orientation_list)
-pf.plot_pf(orientation_list, direction) # passive
-save_plot("617_rotated.png")
+pf.plot_pf(orientation_list_1, direction)
+save_plot("results/pf_1.png")
+pf.plot_pf(orientation_list_2, direction)
+save_plot("results/pf_2.png")
+

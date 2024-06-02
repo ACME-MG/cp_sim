@@ -46,9 +46,9 @@ def get_lattice(structure:str="fcc") -> crystallography.Lattice:
     Returns the lattice object
     """
     lattice = crystallography.CubicLattice(1.0)
-    if structure == "bcc":
+    if structure == "fcc":
         lattice.add_slip_system([1,1,0], [1,1,1])
-    elif structure == "fcc":
+    elif structure == "bcc":
         lattice.add_slip_system([1,1,1], [1,1,0])
         lattice.add_slip_system([1,1,1], [1,2,3])
         lattice.add_slip_system([1,1,1], [1,1,2])
@@ -56,17 +56,28 @@ def get_lattice(structure:str="fcc") -> crystallography.Lattice:
         raise ValueError(f"Crystal structure '{structure}' unsupported!")
     return lattice
 
-def get_orientations(csv_path:str) -> list:
+def get_orientations(csv_path:str, angle_type:str="radians", is_passive:bool=False) -> list:
     """
     Given a path to a CSV file, loads the euler-bunge orientations (rads)
 
     Parameters:
-    * `csv_path`: Path to CSV file of grain information
+    * `csv_path`:   Path to CSV file of grain information
+    * `angle_type:` Whether the angle values are in degrees or radians
+    * `is_passive`: Whether the orientations are passive (as opposed to active)
 
     Returns the list of orientation objects
     """
+
+    # Get euler-bunge angles from file
     grain_stats = np.loadtxt(csv_path, delimiter=",")
-    orientations = [rotations.CrystalOrientation(gs[0], gs[1], gs[2], angle_type="radians", convention="bunge") for gs in grain_stats]
+    eulers = [gs[:3] for gs in grain_stats]
+
+    # Convert to active rotations if passive
+    if is_passive:
+        eulers = [reorient(euler) for euler in eulers]
+    
+    # Return list of orientation objects
+    orientations = [rotations.CrystalOrientation(*euler, angle_type=angle_type, convention="bunge") for euler in eulers]
     return orientations
 
 def get_weights(csv_path:str) -> list:
@@ -87,7 +98,7 @@ def reorient(euler:list) -> list:
     Inverts the euler angle
 
     Parameters:
-    * `euler`: The euler angle
+    * `euler`: The euler angle (rads)
 
     Returns the inverted euler angle
     """
@@ -132,6 +143,8 @@ def quick_spline(x_list:list, y_list:list, x_value:float) -> float:
     
     Returns the evaluated y value
     """
+    if len(x_list) != len(y_list):
+        raise ValueError("Length of lists do not match!")
     for i in range(len(x_list)-1):
         if x_list[i] <= x_value and x_value <= x_list[i+1]:
             gradient = (y_list[i+1]-y_list[i])/(x_list[i+1]-x_list[i])

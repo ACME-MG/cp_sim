@@ -30,7 +30,7 @@ grain_ids = [int(key.replace("g","").replace("_phi_1","")) for key in exp_dict.k
 model = sim.get_model(
     model_name   = "cp",
     lattice      = sim.get_lattice("fcc"),
-    orientations = sim.get_orientations(GRAINS_PATH),
+    orientations = sim.get_orientations(GRAINS_PATH, angle_type="radians", is_passive=True), # passive to active
     weights      = sim.get_weights(GRAINS_PATH),
     num_threads  = NUM_THREADS,
     strain_rate  = STRAIN_RATE,
@@ -65,13 +65,13 @@ for i, combination in enumerate(param_combinations):
     if status != "success":
         dict_to_csv(param_dict, f"{results_path}_{status}.csv")
         continue
-    _, pc_model, results = model.get_output()
+    _, pc_model, results = model.get_output() # active to passive
 
     # Process results
-    strain_list = get_thinned_list([round_sf(s[0], 5) for s in results["strain"]], THIN_AMOUNT)
-    stress_list = get_thinned_list([round_sf(s[0], 5) for s in results["stress"]], THIN_AMOUNT)
-    data_dict   = {"strain": strain_list, "stress": stress_list}
-    history     = sim.get_orientation_history(pc_model, results)
+    strain_list = [round_sf(s[0], 5) for s in results["strain"]]
+    stress_list = [round_sf(s[0], 5) for s in results["stress"]]
+    data_dict   = {"strain": get_thinned_list(strain_list, THIN_AMOUNT), "stress": get_thinned_list(stress_list, THIN_AMOUNT)}
+    history     = sim.get_orientation_history(pc_model, results, inverse=False) # passive
     grain_dict  = sim.get_grain_dict(strain_list, history, grain_ids)
 
     # Check and save results
