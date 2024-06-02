@@ -44,7 +44,7 @@ index_1 = int(sys.argv[1])
 index_2 = int(sys.argv[2])
 all_params_dict = {
     "tau_sat": [[100, 200, 400, 800][index_1]],
-    "b":       [0.5, 1, 2, 4, 8, 16],
+    "b":       [0.25, 0.5, 1, 2, 4, 8, 16],
     "tau_0":   [[100, 200, 400, 800][index_2]],
     "gamma_0": [round_sf(STRAIN_RATE/3, 4)],
     "n":       [1, 2, 4, 8, 16, 32],
