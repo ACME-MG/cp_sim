@@ -294,7 +294,7 @@ def get_colours(orientations:list, values:list) -> list:
     """
 
     # Checks the values
-    if values == None:
+    if not isinstance(values, list):
         return None
     if len(values) != len(orientations):
         raise ValueError("The 'colour_list' does not have the same number of values as the quaternions!")

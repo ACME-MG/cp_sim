@@ -10,7 +10,6 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolours
 
 # Constants
-DEFAULT_PATH = "./plot"
 EXP_COLOUR   = "darkgray"
 CAL_COLOUR   = "green"
 VAL_COLOUR   = "red"
@@ -19,16 +18,14 @@ ALL_COLOURS  = list(mcolours.TABLEAU_COLORS) + list(mcolours.BASE_COLORS) + list
 # Plotter class
 class Plotter:
 
-    def __init__(self, path:str=DEFAULT_PATH, x_label:str="x", y_label:str="y"):
+    def __init__(self, x_label:str="x", y_label:str="y"):
         """
         Class for plotting data
 
         Parameters:
-        * `path`:    The path to save the plot
         * `x_label`: The label for the x axis
         * `y_label`: The label for the y axis
         """
-        self.path = path
         self.x_label = x_label
         self.y_label = y_label
 

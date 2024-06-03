@@ -15,7 +15,7 @@ from cp_sim.helper.interpolator import Interpolator
 # Constants
 RESULTS_DIR     = "results"
 SUMMARY_ID      = "617_s1"
-SAMPLE_PATH     = "/mnt/c/Users/Janzen/OneDrive - UNSW/PhD/results/cp_neml/2024-05-31 (617_s1_g314)"
+SAMPLE_PATH     = "/mnt/c/Users/Janzen/OneDrive - UNSW/PhD/results/cp_neml/2024-06-03 (617_s1_activated)"
 PARAM_NAME_LIST = ["tau_sat", "b", "tau_0", "gamma_0", "n"]
 STRAIN_HEADER   = "strain"
 STRESS_HEADER   = "stress"
