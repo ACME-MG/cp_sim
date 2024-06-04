@@ -6,13 +6,13 @@ from cp_sim.io.pole_figure import IPF
 from cp_sim.io.plotter import save_plot, define_legend
 
 # Paths
-SUM_ID    = "617_s1"
+SUM_ID    = "p91_s3"
 SIM_PATH  = f"results/{SUM_ID}_phi.csv"
 EXP_PATH  = f"../data/{SUM_ID}_exp.csv"
 
 # Parameters
 # GRAIN_IDS = [75, 189, 314, 346, 463] # 56, 346, 463, 568*, 650
-GRAIN_IDS = [56, 346, 463, 568, 650]
+GRAIN_IDS = [43, 44, 45, 47, 48] # 4, 29, 33
 PHI_LIST  = ["phi_1", "Phi", "phi_2"]
 STRAINS   = ["0p2", "0p4", "0p6", "0p8", "1p0"]
 
