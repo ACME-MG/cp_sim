@@ -9,7 +9,7 @@
 
 # Libraries
 import numpy as np
-from orientation import random_euler, deg_to_rad, euler_to_matrix, matrix_to_euler, get_matrix_product, get_inverted
+from cp_sim.maths.orientation import random_euler, deg_to_rad, euler_to_matrix, matrix_to_euler, get_matrix_product, get_inverted
 
 # Dictionary of CSLs
 CSL_DICT = {
